@@ -4,32 +4,43 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
+import Login from "@/pages/Login";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedAdmin } from "./components/ProtectedRoute";
 import { AdminWorkspace, PublicPortal } from "./pages/ConselhoOS";
 
+
+function AdminRoutes() {
+  return (
+    <ProtectedAdmin>
+      <AdminWorkspace />
+    </ProtectedAdmin>
+  );
+}
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={PublicPortal} />
-      <Route path={"/dashboard"} component={AdminWorkspace} />
-      <Route path={"/conselhos"} component={AdminWorkspace} />
-      <Route path={"/membros"} component={AdminWorkspace} />
-      <Route path={"/mandatos"} component={AdminWorkspace} />
-      <Route path={"/reunioes"} component={AdminWorkspace} />
-      <Route path={"/pautas"} component={AdminWorkspace} />
-      <Route path={"/votacoes"} component={AdminWorkspace} />
-      <Route path={"/atas"} component={AdminWorkspace} />
-      <Route path={"/resolucoes"} component={AdminWorkspace} />
-      <Route path={"/documentos"} component={AdminWorkspace} />
-      <Route path={"/encaminhamentos"} component={AdminWorkspace} />
-      <Route path={"/relatorios"} component={AdminWorkspace} />
-      <Route path={"/auditoria"} component={AdminWorkspace} />
-      <Route path={"/configuracoes"} component={AdminWorkspace} />
+      <Route path={"/login"} component={Login} />
+      <Route path={"/dashboard"} component={AdminRoutes} />
+      <Route path={"/conselhos"} component={AdminRoutes} />
+      <Route path={"/membros"} component={AdminRoutes} />
+      <Route path={"/mandatos"} component={AdminRoutes} />
+      <Route path={"/reunioes"} component={AdminRoutes} />
+      <Route path={"/pautas"} component={AdminRoutes} />
+      <Route path={"/votacoes"} component={AdminRoutes} />
+      <Route path={"/atas"} component={AdminRoutes} />
+      <Route path={"/resolucoes"} component={AdminRoutes} />
+      <Route path={"/documentos"} component={AdminRoutes} />
+      <Route path={"/encaminhamentos"} component={AdminRoutes} />
+      <Route path={"/relatorios"} component={AdminRoutes} />
+      <Route path={"/auditoria"} component={AdminRoutes} />
+      <Route path={"/configuracoes"} component={AdminRoutes} />
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
@@ -43,15 +54,14 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="light">
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
