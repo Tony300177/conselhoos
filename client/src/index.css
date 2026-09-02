@@ -65,7 +65,7 @@
   --secondary: #edf1e9;
   --secondary-foreground: #405347;
   --muted: #eef1ea;
-  --muted-foreground: #718072;
+  --muted-foreground: #5e6c64;
   --accent: #e8f0e8;
   --accent-foreground: #285a43;
   --destructive: #a9533a;
@@ -172,6 +172,45 @@
   @keyframes civic-enter {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes loadingbar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+  }
+
+  .loading-bar {
+    height: 100%;
+    width: 40%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #173f34, #4f896e, #c46c4b);
+    animation: loadingbar 1.15s ease-in-out infinite;
+  }
+
+  .skip-link {
+    position: fixed;
+    left: 0.75rem;
+    top: -100px;
+    z-index: 100;
+    padding: 0.625rem 1rem;
+    border-radius: 0.5rem;
+    background: #173f34;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: top 0.2s ease;
+  }
+  .skip-link:focus {
+    top: 0.75rem;
+  }
+
+  :focus-visible {
+    outline: 2px solid #658b71;
+    outline-offset: 2px;
+  }
+
+  .btn-icon-focus:focus-visible {
+    outline: 2px solid #658b71;
   }
 
   /**

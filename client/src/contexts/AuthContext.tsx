@@ -7,6 +7,8 @@ type AuthContextType = {
   session: Session | null;
   profile: UserProfile | null;
   loading: boolean;
+  sessionExpired: boolean;
+  setSessionExpired: (value: boolean) => void;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -20,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   async function fetchProfile(userId: string) {
     const { data, error } = await supabase
@@ -42,7 +45,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (_event, newSession) => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        if (_event === "SIGNED_OUT" && !newSession?.user && !loading) {
+          setSessionExpired(true);
+        }
         if (newSession?.user) {
+          setSessionExpired(false);
           await fetchProfile(newSession.user.id);
         } else {
           setProfile(null);
@@ -72,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setSessionExpired(false);
   };
 
   const refreshProfile = async () => {
@@ -79,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signIn, signUp, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, sessionExpired, setSessionExpired, signIn, signUp, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
