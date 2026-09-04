@@ -1,6 +1,6 @@
-# ConselhoOS — Estado do Projeto
+# Delibera — Estado do Projeto
 
-Este projeto materializa a experiência inicial do **ConselhoOS**, uma plataforma para gestão colegiada, deliberações, transparência e participação social. A implementação atual prioriza a camada de produto: navegação, fluxos visuais, linguagem institucional e os pontos de integração que deverão receber dados e permissões reais.
+Este projeto materializa a experiência inicial do **Delibera**, uma plataforma para gestão colegiada, deliberações, transparência e participação social. A implementação atual prioriza a camada de produto: navegação, fluxos visuais, linguagem institucional e os pontos de integração que deverão receber dados e permissões reais.
 
 > **Princípio de entrega:** a interface não simula integração produtiva. Os números e registros exibidos são dados demonstrativos de layout; autenticação, persistência, documentos e permissões devem ser conectados à estrutura Supabase prevista no PRD antes do uso operacional.
 

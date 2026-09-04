@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { useLocation } from "wouter";
 
-const TOUR_KEY = "conselhoos.tour.done.v1";
+const TOUR_KEY = "delibera.tour.done.v1";
 
 const steps = [
   {

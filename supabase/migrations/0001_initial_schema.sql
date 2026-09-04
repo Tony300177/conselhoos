@@ -1,4 +1,4 @@
--- ConselhoOS — Schema inicial (Supabase)
+-- Delibera — Schema inicial (Supabase)
 -- Fundação de dados do MVP: perfis, conselhos, operação colegiada, deliberação e transparência.
 
 -- =============================================================================

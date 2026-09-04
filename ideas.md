@@ -1,4 +1,4 @@
-# Direção de Design — ConselhoOS
+# Direção de Design — Delibera
 
 ## Três abordagens consideradas
 
@@ -63,7 +63,7 @@ As manchetes devem ser diretas, informativas e sem jargão excessivo. CTAs usam 
 
 ### Wordmark e logo
 
-O logotipo combina o nome ConselhoOS com um selo geométrico de três arcos de espessura variável, como ondas concêntricas que convergem para uma decisão pública. O símbolo vive isolado em contextos compactos e acompanha o wordmark em cabeçalhos institucionais.
+O logotipo combina o nome Delibera com um selo geométrico de três arcos de espessura variável, como ondas concêntricas que convergem para uma decisão pública. O símbolo vive isolado em contextos compactos e acompanha o wordmark em cabeçalhos institucionais.
 
 ### Cor de assinatura
 

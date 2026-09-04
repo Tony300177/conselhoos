@@ -13,7 +13,7 @@ import { CivicMark } from "@/components/CivicMark";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const USERNAME_DOMAIN = "conselhoos.local";
+const USERNAME_DOMAIN = "delibera.local";
 function toEmail(username: string) {
   return `${username}@${USERNAME_DOMAIN}`;
 }

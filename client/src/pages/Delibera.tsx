@@ -485,7 +485,7 @@ function SidebarNav({ active, onNavigate }: { active: ModuleKey; onNavigate: (ro
   const go = (route: string) => { onNavigate(route); setLocation(route); };
   return (
     <div className="flex h-full flex-col">
-      <button type="button" onClick={() => setLocation("/")} title="Voltar ao início (Selo ConselhoOS)" className="w-full rounded-xl px-2 pt-2 text-left transition hover:bg-[#EFF2EC]"><CivicMark /></button>
+      <button type="button" onClick={() => setLocation("/")} title="Voltar ao início (Selo Delibera)" className="w-full rounded-xl px-2 pt-2 text-left transition hover:bg-[#EFF2EC]"><CivicMark /></button>
       <nav aria-label="Navegação principal" className="sidebar-scroll mt-8 flex-1 overflow-y-auto pr-1">
         {navGroups.map((group) => (
           <div key={group.label} className="mb-6">

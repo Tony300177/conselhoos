@@ -19,14 +19,14 @@ export function CivicMark({ className, label = true, inverted = false }: CivicMa
         )}
       >
         <img
-          src="/conselhoos-mark.svg"
-          alt="Selo ConselhoOS"
+          src="/delibera-mark.svg"
+          alt="Selo Delibera"
           className="size-7 object-contain"
         />
       </div>
       {label && (
         <div className={cn("leading-none", inverted ? "text-[#FCFAF4]" : "text-[#173F34]")}>
-          <p className="font-editorial text-[21px] font-semibold tracking-[-0.045em]">Conselho<span className="text-[#C46C4B]">OS</span></p>
+          <p className="font-editorial text-[21px] font-semibold tracking-[-0.045em]">Delibera</p>
           <p className={cn("mt-1 text-[9px] font-bold uppercase tracking-[0.17em]", inverted ? "text-white/55" : "text-[#6D786F]")}>Governança colegiada</p>
         </div>
       )}

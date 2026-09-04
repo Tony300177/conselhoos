@@ -13,8 +13,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedAdmin } from "./components/ProtectedRoute";
 import { LoadingProvider } from "./contexts/LoadingContext";
 
-const PublicPortal = lazy(() => import("./pages/ConselhoOS").then((m) => ({ default: m.PublicPortal })));
-const LazyAdminWorkspace = lazy(() => import("./pages/ConselhoOS").then((m) => ({ default: m.AdminWorkspace })));
+const PublicPortal = lazy(() => import("./pages/Delibera").then((m) => ({ default: m.PublicPortal })));
+const LazyAdminWorkspace = lazy(() => import("./pages/Delibera").then((m) => ({ default: m.AdminWorkspace })));
 
 function PageLoader() {
   return (
