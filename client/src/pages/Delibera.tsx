@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Circle,
   CircleDot,
   Clock3,
   Download,
@@ -47,7 +46,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,7 +59,7 @@ import { ModuleSkeleton } from "@/components/ModuleSkeleton";
 import { SessionExpiredDialog } from "@/components/SessionExpiredDialog";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRegistros, diaMes, type Reuniao, type Ata, type Resolucao, type Documento } from "@/lib/registros";
+import { useRegistros, diaMes, useConfigInstituicao, type Reuniao, type Ata, type Resolucao, type Documento, type Pauta, type Votacao, type Membro, type Mandato, type Encaminhamento, type AuditoriaLog } from "@/lib/registros";
 import { podeCriarPagina, podePublicarPagina, LABEL_PERMISSAO } from "@/lib/permissoes";
 
 type ModuleKey = "dashboard" | "conselhos" | "membros" | "mandatos" | "reunioes" | "pautas" | "votacoes" | "atas" | "resolucoes" | "documentos" | "encaminhamentos" | "relatorios" | "auditoria" | "configuracoes";
@@ -159,6 +157,36 @@ const atasSemente: Ata[] = [
 const resolucoesSemente: Resolucao[] = [
   { id: "res-01", numero: "18/2026", title: "Aprovação do Plano Quadrienal de Saúde", council: "Conselho Municipal de Saúde", date: "2026-08-12", status: "Publicada" },
   { id: "res-02", numero: "17/2026", title: "Diretrizes para o calendário letivo", council: "Conselho de Educação", date: "2026-07-25", status: "Aprovada" },
+];
+
+const pautasSemente: Pauta[] = [
+  { id: "pau-01", numero: "01/2026", title: "Revisão do Plano Municipal de Saúde", council: "Conselho Municipal de Saúde", relator: "Ana Sousa", date: "2026-08-28", status: "Em votação" },
+  { id: "pau-02", numero: "02/2026", title: "Calendário letivo 2027", council: "Conselho de Educação", relator: "Carlos Lima", date: "2026-09-02", status: "Em revisão" },
+];
+
+const votacoesSemente: Votacao[] = [
+  { id: "vot-01", tema: "Aprovar Plano Municipal de Saúde", council: "Conselho Municipal de Saúde", date: "2026-08-28", aFavor: 18, contra: 2, abstencoes: 1, resultado: "Aprovada" },
+  { id: "vot-02", tema: "Adiar meta do 3º trimestre", council: "Conselho de Educação", date: "2026-07-15", aFavor: 9, contra: 11, abstencoes: 0, resultado: "Rejeitada" },
+];
+
+const membrosSemente: Membro[] = [
+  { id: "mem-01", nome: "Ana Sousa", entidade: "Secretaria Municipal de Saúde", council: "Conselho Municipal de Saúde", papel: "Titular", status: "Ativo" },
+  { id: "mem-02", nome: "Carlos Lima", entidade: "Sindicato dos Professores", council: "Conselho de Educação", papel: "Suplente", status: "Ativo" },
+];
+
+const mandatosSemente: Mandato[] = [
+  { id: "man-01", council: "Conselho Municipal de Saúde", titular: "Ana Sousa", entidade: "Secretaria Municipal de Saúde", inicio: "2025-01-01", fim: "2026-12-31", situacao: "Vigente" },
+  { id: "man-02", council: "Conselho de Educação", titular: "Paula Neves", entidade: "Associação de Pais e Mestres", inicio: "2024-03-01", fim: "2026-02-28", situacao: "Encerrado" },
+];
+
+const encaminhamentosSemente: Encaminhamento[] = [
+  { id: "enc-01", decisao: "Encaminhar Plano à Secretaria de Saúde", responsavel: "Ana Sousa", council: "Conselho Municipal de Saúde", prazo: "2026-09-06", status: "Em andamento" },
+  { id: "enc-02", decisao: "Publicar resolução nº 17/2026", responsavel: "Carlos Lima", council: "Conselho de Educação", prazo: "2026-09-04", status: "Concluído" },
+];
+
+const auditoriaSemente: AuditoriaLog[] = [
+  { id: "aud-01", acao: "Cadastro do conselho 'Conselho Municipal de Saúde'", ator: "Ana Sousa", modulo: "Conselhos", data: "2026-09-04T14:02:00" },
+  { id: "aud-02", acao: "Publicação da Resolução nº 18/2026", ator: "Carlos Lima", modulo: "Resoluções", data: "2026-08-12T09:40:00" },
 ];
 
 function ActionButton({ children, onClick, className }: { children: React.ReactNode; onClick: () => void; className?: string }) {
@@ -788,73 +816,671 @@ function ResolucoesView() {
   );
 }
 
-function ModuleRoadmapDialog({ open, onOpenChange, module }: { open: boolean; onOpenChange: (v: boolean) => void; module: ModuleKey }) {
-  const data = moduleTitles[module];
-  const steps = [
-    { title: "Modelagem de dados", done: true, desc: "Tabela e relacionamentos previstos no Supabase." },
-    { title: "Tela e navegação", done: true, desc: "Estrutura, permissões e estados da interface." },
-    { title: "Conexão com o banco", done: false, desc: "Liga a tela à base Supabase e às regras de acesso." },
-    { title: "Casos de uso", done: false, desc: "Fluxos completos de registro, consulta e atualização." },
-    { title: "Publicação e auditoria", done: false, desc: "Versão oficial, trilha de alterações e usuários." },
-  ];
+function CriarPautaDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (p: Omit<Pauta, "id">) => void }) {
+  const [numero, setNumero] = useState("");
+  const [title, setTitle] = useState("");
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [relator, setRelator] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [status, setStatus] = useState("Rascunho");
+  const ano = new Date().getFullYear();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Roteiro de implementação</DialogTitle>
-          <DialogDescription className="text-sm leading-6">{data.title}: etapas do MVP para conectar este módulo à base de dados.</DialogDescription>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Registrar pauta</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Organize o assunto, a relatoria e a data em que será deliberado.</DialogDescription>
         </DialogHeader>
-        <ol className="space-y-3 py-2">
-          {steps.map((step, i) => (
-            <li key={step.title} className="flex gap-3 rounded-xl border border-[#E1E5DE] bg-[#FCFBF7] p-3">
-              {step.done ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#285A43]" /> : <Circle className="mt-0.5 size-5 shrink-0 text-[#C5CDCB]" />}
-              <div className="min-w-0">
-                <p className="text-[14px] font-bold text-[#294038]"><span className="mr-1.5 text-[#A9533A]">{i + 1}.</span>{step.title}</p>
-                <p className="mt-0.5 text-[13px] leading-5 text-[#657268]">{step.done ? "Concluído — " : "Aguardando — "}{step.desc}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <DialogFooter className="gap-2 sm:justify-between">
-          <p className="text-[13px] font-semibold text-[#5E6C64]">{steps.filter((s) => s.done).length} de {steps.length} etapas concluídas</p>
-          <DialogClose asChild><Button className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]">Entendi</Button></DialogClose>
+        <div className="grid gap-4 py-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="pau-numero" className="text-[13px] font-bold text-[#405347]">Número</Label>
+              <Input id="pau-numero" value={numero} onChange={(e) => setNumero(e.target.value)} placeholder={`03/${ano}`} maxLength={10} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="pau-date" className="text-[13px] font-bold text-[#405347]">Data</Label>
+              <Input id="pau-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="text-[14px]" />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="pau-title" className="text-[13px] font-bold text-[#405347]">Assunto</Label>
+            <Input id="pau-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Revisão do plano anual de metas" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="pau-relator" className="text-[13px] font-bold text-[#405347]">Relator(a)</Label>
+              <Input id="pau-relator" value={relator} onChange={(e) => setRelator(e.target.value)} placeholder="Ex.: Ana Sousa" className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{"Rascunho,Em revisão,Em votação,Aprovada".split(",").map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!title.trim()}
+            onClick={() => {
+              onSave({ numero: numero.trim() || `03/${ano}`, title: title.trim(), council: council || "Conselho não informado", relator: relator.trim() || "Relatoria a definir", date, status });
+              setNumero(""); setTitle(""); setRelator(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Registrar pauta
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function GenericModule({ active }: { active: ModuleKey }) {
-  const data = moduleTitles[active];
-  const [roadmapOpen, setRoadmapOpen] = useState(false);
-  const icons: Record<ModuleKey, typeof Landmark> = { dashboard: LayoutDashboard, conselhos: Landmark, membros: UsersRound, mandatos: ShieldCheck, reunioes: CalendarDays, pautas: ListChecks, votacoes: Vote, atas: BookOpen, resolucoes: FileText, documentos: FolderOpen, encaminhamentos: CheckCircle2, relatorios: BarChart3, auditoria: Activity, configuracoes: Settings2 };
-  const Icon = icons[active];
+function CriarVotacaoDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (v: Omit<Votacao, "id">) => void }) {
+  const [tema, setTema] = useState("");
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [aFavor, setAFavor] = useState(0);
+  const [contra, setContra] = useState(0);
+  const [abstencoes, setAbstencoes] = useState(0);
+  const [resultado, setResultado] = useState("Aprovada");
   return (
-    <>
-    <Empty className="min-h-[420px] rounded-none border-[#DDE2DB] bg-[#FCFBF7] p-7">
-      <EmptyHeader>
-        <EmptyMedia variant="icon" className="size-12 rounded-2xl bg-[#E8F0E8] text-[#285A43]">
-          <Icon className="size-5" />
-        </EmptyMedia>
-        <p className="mt-1 text-[13px] font-bold uppercase tracking-[0.15em] text-[#A9533A]">Módulo em preparação</p>
-        <EmptyTitle className="font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{data.title}</EmptyTitle>
-        <EmptyDescription className="mx-auto max-w-md text-[13px] leading-6 text-[#657268]">
-          {data.description} A estrutura de navegação, permissões e estados já está prevista no MVP. A próxima etapa conecta esta tela à base Supabase e às regras de acesso.
-        </EmptyDescription>
-      </EmptyHeader>
-      <EmptyContent>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button onClick={() => toast.success("Módulo registrado no roteiro de implementação do MVP.")} className="h-10 rounded-xl bg-[#173F34] px-4 text-[14px] font-semibold text-white hover:bg-[#245446]">
-            <Sparkles className="mr-2 size-3.5" />Registrar prioridade
-          </Button>
-          <Button onClick={() => setRoadmapOpen(true)} variant="outline" className="h-10 rounded-xl border-[#CBD4CA] bg-white text-[14px] font-bold text-[#285A43] hover:bg-[#EAF1E9]">
-            <ArrowRight className="mr-2 size-3.5" />Ver roteiro
-          </Button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Registrar votação</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Registre o tema deliberado e o placar com quórum correspondente.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label htmlFor="vot-tema" className="text-[13px] font-bold text-[#405347]">Tema deliberado</Label>
+            <Input id="vot-tema" value={tema} onChange={(e) => setTema(e.target.value)} placeholder="Ex.: Aprovação do plano anual" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="vot-date" className="text-[13px] font-bold text-[#405347]">Data</Label>
+              <Input id="vot-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Resultado</Label>
+              <Select value={resultado} onValueChange={setResultado}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{"Aprovada,Rejeitada,Empatada".split(",").map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="vot-fav" className="text-[13px] font-bold text-[#405347]">A favor</Label>
+              <Input id="vot-fav" type="number" min={0} value={aFavor} onChange={(e) => setAFavor(Number(e.target.value) || 0)} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="vot-contra" className="text-[13px] font-bold text-[#405347]">Contra</Label>
+              <Input id="vot-contra" type="number" min={0} value={contra} onChange={(e) => setContra(Number(e.target.value) || 0)} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="vot-abst" className="text-[13px] font-bold text-[#405347]">Abstenções</Label>
+              <Input id="vot-abst" type="number" min={0} value={abstencoes} onChange={(e) => setAbstencoes(Number(e.target.value) || 0)} className="text-[14px]" />
+            </div>
+          </div>
         </div>
-      </EmptyContent>
-    </Empty>
-    <ModuleRoadmapDialog open={roadmapOpen} onOpenChange={setRoadmapOpen} module={active} /></>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!tema.trim()}
+            onClick={() => {
+              onSave({ tema: tema.trim(), council: council || "Conselho não informado", date, aFavor, contra, abstencoes, resultado });
+              setTema(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Registrar votação
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
+}
+
+function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (m: Omit<Membro, "id">) => void }) {
+  const [nome, setNome] = useState("");
+  const [entidade, setEntidade] = useState("");
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [papel, setPapel] = useState("Titular");
+  const [status, setStatus] = useState("Ativo");
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Cadastrar membro</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Registre a representação, a entidade e a situação de participação.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label htmlFor="mem-nome" className="text-[13px] font-bold text-[#405347]">Nome completo</Label>
+            <Input id="mem-nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Maria Oliveira" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="mem-entidade" className="text-[13px] font-bold text-[#405347]">Entidade / representação</Label>
+            <Input id="mem-entidade" value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Ex.: Secretaria Municipal de Saúde" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Papel</Label>
+              <Select value={papel} onValueChange={setPapel}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{["Titular", "Suplente"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{["Ativo", "Substituído", "Encerrado"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!nome.trim()}
+            onClick={() => {
+              onSave({ nome: nome.trim(), entidade: entidade.trim() || "Representação a informar", council: council || "Conselho não informado", papel, status });
+              setNome(""); setEntidade(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Cadastrar membro
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CriarMandatoDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (m: Omit<Mandato, "id">) => void }) {
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [titular, setTitular] = useState("");
+  const [entidade, setEntidade] = useState("");
+  const [inicio, setInicio] = useState("2026-01-01");
+  const [fim, setFim] = useState("2027-12-31");
+  const [situacao, setSituacao] = useState("Vigente");
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Registrar mandato</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Vincule a nomeação ao titular, à entidade e ao período de exercício.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="man-titular" className="text-[13px] font-bold text-[#405347]">Titular</Label>
+            <Input id="man-titular" value={titular} onChange={(e) => setTitular(e.target.value)} placeholder="Ex.: Maria Oliveira" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="man-entidade" className="text-[13px] font-bold text-[#405347]">Entidade</Label>
+            <Input id="man-entidade" value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Ex.: Secretaria Municipal de Saúde" className="text-[14px]" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="man-inicio" className="text-[13px] font-bold text-[#405347]">Início</Label>
+              <Input id="man-inicio" type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="man-fim" className="text-[13px] font-bold text-[#405347]">Fim</Label>
+              <Input id="man-fim" type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="text-[14px]" />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Situação</Label>
+            <Select value={situacao} onValueChange={setSituacao}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{["Vigente", "Renovado", "Encerrado"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!titular.trim()}
+            onClick={() => {
+              onSave({ council: council || "Conselho não informado", titular: titular.trim(), entidade: entidade.trim() || "Entidade a informar", inicio, fim, situacao });
+              setTitular(""); setEntidade(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Registrar mandato
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CriarEncaminhamentoDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (e: Omit<Encaminhamento, "id">) => void }) {
+  const [decisao, setDecisao] = useState("");
+  const [responsavel, setResponsavel] = useState("");
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [prazo, setPrazo] = useState(new Date().toISOString().slice(0, 10));
+  const [status, setStatus] = useState<Encaminhamento["status"]>("Pendente");
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Registrar encaminhamento</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Conecte a decisão ao responsável e ao prazo de conclusão.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label htmlFor="enc-decisao" className="text-[13px] font-bold text-[#405347]">Decisão / encaminhamento</Label>
+            <Input id="enc-decisao" value={decisao} onChange={(e) => setDecisao(e.target.value)} placeholder="Ex.: Encaminhar plano à secretaria" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="enc-resp" className="text-[13px] font-bold text-[#405347]">Responsável</Label>
+              <Input id="enc-resp" value={responsavel} onChange={(e) => setResponsavel(e.target.value)} placeholder="Ex.: Ana Sousa" className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="enc-prazo" className="text-[13px] font-bold text-[#405347]">Prazo</Label>
+              <Input id="enc-prazo" type="date" value={prazo} onChange={(e) => setPrazo(e.target.value)} className="text-[14px]" />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Status</Label>
+            <Select value={status} onValueChange={(v) => setStatus(v as Encaminhamento["status"])}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{["Pendente", "Em andamento", "Concluído"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!decisao.trim()}
+            onClick={() => {
+              onSave({ decisao: decisao.trim(), council: council || "Conselho não informado", responsavel: responsavel.trim() || "Responsável a definir", prazo, status });
+              setDecisao(""); setResponsavel(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Registrar encaminhamento
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PautasView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
+  const podePublicar = podePublicarPagina(profile?.role, isAdmin);
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar, atualizar } = useRegistros<Pauta>("pautas", pautasSemente);
+  const salvar = (p: Omit<Pauta, "id">): void => {
+    adicionar(p);
+    toast.success(`Pauta ${p.numero} registrada.`);
+  };
+  const aprovar = (p: Pauta): void => {
+    atualizar(p.id, { status: "Aprovada" });
+    toast.success(`Pauta ${p.numero} aprovada.`);
+  };
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Organização de pauta</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} pautas ordenadas.</p>
+        </div>
+        {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Nova pauta</ActionButton>}
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((p) => (
+          <article key={p.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div>
+              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">PAUTA {p.numero}</p>
+              <p className="mt-1 text-[13px] text-[#5E6C64]">{formatarData(p.date)}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{p.title}</p>
+              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{p.council} · Relator(a): {p.relator}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <StatusPill tone={tonePublicacao(p.status)}>{p.status}</StatusPill>
+              {podePublicar && p.status !== "Aprovada" && (
+                <button onClick={() => aprovar(p)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#285A43] transition hover:bg-[#EAF1E9]">Aprovar</button>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+      <CriarPautaDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+    </div>
+  );
+}
+
+function VotacoesView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar } = useRegistros<Votacao>("votacoes", votacoesSemente);
+  const salvar = (v: Omit<Votacao, "id">): void => {
+    adicionar(v);
+    toast.success(`Votação "${v.tema}" registrada como ${v.resultado}.`);
+  };
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Registro de deliberação</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} votações registradas.</p>
+        </div>
+        {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Nova votação</ActionButton>}
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((v) => (
+          <article key={v.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div>
+              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">{formatarData(v.date)}</p>
+              <p className="mt-1 text-[13px] text-[#5E6C64]">{v.council}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{v.tema}</p>
+              <p className="mt-1 text-[13px] font-semibold text-[#657268]">{v.aFavor} a favor · {v.contra} contra · {v.abstencoes} abstenções</p>
+            </div>
+            <StatusPill tone={toneVotacao(v.resultado)}>{v.resultado}</StatusPill>
+          </article>
+        ))}
+      </section>
+      <CriarVotacaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+    </div>
+  );
+}
+
+function MembrosView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
+  const podePublicar = podePublicarPagina(profile?.role, isAdmin);
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar, atualizar } = useRegistros<Membro>("membros", membrosSemente);
+  const salvar = (m: Omit<Membro, "id">): void => {
+    adicionar(m);
+    toast.success(`Membro ${m.nome} cadastrado.`);
+  };
+  const encerrar = (m: Membro): void => {
+    atualizar(m.id, { status: "Encerrado" });
+    toast.success(`Participação de ${m.nome} encerrada.`);
+  };
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Composição colegiada</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} membros representados.</p>
+        </div>
+        {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo membro</ActionButton>}
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((m) => (
+          <article key={m.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div className="grid size-11 place-items-center rounded-full bg-[#D5E2D3] text-[14px] font-black text-[#285A43]">{m.nome.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}</div>
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{m.nome} <span className="font-semibold text-[#68756B]">· {m.papel}</span></p>
+              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{m.entidade} · {m.council}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <StatusPill tone={statusMembroTone(m.status)}>{m.status}</StatusPill>
+              {podePublicar && m.status !== "Encerrado" && (
+                <button onClick={() => encerrar(m)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#A9533A] transition hover:bg-[#FDF3ED]">Encerrar</button>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+      <CriarMembroDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+    </div>
+  );
+}
+
+function MandatosView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
+  const podePublicar = podePublicarPagina(profile?.role, isAdmin);
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar, atualizar } = useRegistros<Mandato>("mandatos", mandatosSemente);
+  const salvar = (m: Omit<Mandato, "id">): void => {
+    adicionar(m);
+    toast.success(`Mandato de ${m.titular} registrado.`);
+  };
+  const encerrar = (m: Mandato): void => {
+    atualizar(m.id, { situacao: "Encerrado" });
+    toast.success(`Mandato de ${m.titular} encerrado.`);
+  };
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Vigência e posse</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} mandatos controlados.</p>
+        </div>
+        {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo mandato</ActionButton>}
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((m) => (
+          <article key={m.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{m.titular} <span className="font-semibold text-[#68756B]">· {m.entidade}</span></p>
+              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{m.council} · {formatarData(m.inicio)} a {formatarData(m.fim)}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <StatusPill tone={toneMandato(m.situacao)}>{m.situacao}</StatusPill>
+              {podePublicar && m.situacao === "Vigente" && (
+                <button onClick={() => encerrar(m)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#A9533A] transition hover:bg-[#FDF3ED]">Encerrar</button>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+      <CriarMandatoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+    </div>
+  );
+}
+
+function EncaminhamentosView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
+  const podePublicar = podePublicarPagina(profile?.role, isAdmin);
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar, atualizar } = useRegistros<Encaminhamento>("encaminhamentos", encaminhamentosSemente);
+  const pendentes = registros.filter((e) => e.status !== "Concluído").length;
+  const salvar = (e: Omit<Encaminhamento, "id">): void => {
+    adicionar(e);
+    toast.success("Encaminhamento registrado.");
+  };
+  const concluir = (e: Encaminhamento): void => {
+    atualizar(e.id, { status: "Concluído" });
+    toast.success(`Encaminhamento concluído: ${e.decisao}`);
+  };
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Responsabilidade e prazo</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{pendentes} de {registros.length} aguardando conclusão.</p>
+        </div>
+        {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo encaminhamento</ActionButton>}
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((e) => (
+          <article key={e.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{e.decisao}</p>
+              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{e.responsavel} · {e.council} · Prazo: {formatarData(e.prazo)}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <StatusPill tone={toneEncaminhamento(e.status)}>{e.status}</StatusPill>
+              {podePublicar && e.status !== "Concluído" && (
+                <button onClick={() => concluir(e)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#285A43] transition hover:bg-[#EAF1E9]">Concluir</button>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+      <CriarEncaminhamentoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+    </div>
+  );
+}
+
+function AuditoriaView() {
+  const { registros } = useRegistros<AuditoriaLog>("auditoria", auditoriaSemente);
+  return (
+    <div className="space-y-7">
+      <section className="border-b border-[#DDE2DB] pb-6">
+        <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Histórico institucional</p>
+        <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">Trilha de alterações preservada.</p>
+        <p className="mt-3 max-w-xl text-[13px] leading-6 text-[#657268]">Os registros de auditoria são gerados automaticamente pelas ações de criação, edição e publicação no sistema.</p>
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((log) => (
+          <article key={log.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[40px_minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div className="grid size-10 place-items-center rounded-full bg-[#E8F0E8] text-[#285A43]"><Activity className="size-4" /></div>
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{log.acao}</p>
+              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{log.ator} · {log.modulo}</p>
+            </div>
+            <p className="text-right text-[12px] font-medium text-[#7A867B]">{formatarDataHora(log.data)}</p>
+          </article>
+        ))}
+      </section>
+    </div>
+  );
+}
+
+function ConfiguracoesView() {
+  const { isAdmin } = useAuth();
+  const { config, setConfig } = useConfigInstituicao({
+    organizacao: "Secretaria Municipal de Educação",
+    email: "gestao@delibera.local",
+    periodicidade: "Mensal",
+    modeloAta: "Aprovada em plenária",
+    regraPublicacao: "Pública após aprovação",
+  });
+  const salvar = () => {
+    if (!isAdmin) return;
+    toast.success("Configurações institucionais salvas.");
+  };
+  const campoCls = "text-[14px]" + (isAdmin ? "" : " opacity-70");
+  return (
+    <div className="space-y-7">
+      <section className="border-b border-[#DDE2DB] pb-6">
+        <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Regras da organização</p>
+        <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">Padrões de funcionamento e publicação.</p>
+        <p className="mt-3 max-w-xl text-[13px] leading-6 text-[#657268]">{isAdmin ? "Altere os padrões institucionais. As mudanças valem para toda a gestão." : "Somente o administrador pode alterar estas definições."}</p>
+      </section>
+      <section className="grid gap-x-8 gap-y-5 border border-[#DDE2DB] bg-[#FCFBF7] p-6 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <Label htmlFor="cfg-org" className="text-[13px] font-bold text-[#405347]">Organização</Label>
+          <Input id="cfg-org" readOnly={!isAdmin} disabled={!isAdmin} value={config.organizacao} onChange={(e) => setConfig({ ...config, organizacao: e.target.value })} className={campoCls} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="cfg-email" className="text-[13px] font-bold text-[#405347]">E-mail institucional</Label>
+          <Input id="cfg-email" readOnly={!isAdmin} disabled={!isAdmin} value={config.email} onChange={(e) => setConfig({ ...config, email: e.target.value })} className={campoCls} />
+        </div>
+        <div className="grid gap-2">
+          <Label className="text-[13px] font-bold text-[#405347]">Periodicidade padrão</Label>
+          <Select value={config.periodicidade} onValueChange={isAdmin ? (v) => setConfig({ ...config, periodicidade: v }) : () => undefined}>
+            <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+            <SelectContent>{["Mensal", "Bimestral", "Trimestral", "Anual"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
+          <Label className="text-[13px] font-bold text-[#405347]">Modelo de ata</Label>
+          <Select value={config.modeloAta} onValueChange={isAdmin ? (v) => setConfig({ ...config, modeloAta: v }) : () => undefined}>
+            <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+            <SelectContent>{["Aprovada em plenária", "Aprovada por envio", "Publicada após revisão"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2 sm:col-span-2">
+          <Label className="text-[13px] font-bold text-[#405347]">Regra de publicação</Label>
+          <Select value={config.regraPublicacao} onValueChange={isAdmin ? (v) => setConfig({ ...config, regraPublicacao: v }) : () => undefined}>
+            <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+            <SelectContent>{["Pública após aprovação", "Pública imediata", "Interna até revisão"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        {isAdmin && (
+          <div className="sm:col-span-2">
+            <button type="button" onClick={salvar} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#173F34] px-4 text-[13px] font-semibold text-white shadow-[0_7px_16px_rgba(23,63,52,0.18)] hover:bg-[#245446]"><Check className="size-4" />Salvar configurações</button>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function toneVotacao(r: string): "confirmed" | "pending" | "danger" {
+  if (r === "Aprovada") return "confirmed";
+  if (r === "Rejeitada") return "danger";
+  return "pending";
+}
+
+function statusMembroTone(s: string): "confirmed" | "review" | "pending" {
+  if (s === "Ativo") return "confirmed";
+  if (s === "Substituído") return "review";
+  return "pending";
+}
+
+function toneMandato(s: string): "confirmed" | "review" | "pending" {
+  if (s === "Renovado") return "confirmed";
+  if (s === "Vigente") return "confirmed";
+  return "pending";
+}
+
+function toneEncaminhamento(s: string): "confirmed" | "review" | "pending" {
+  if (s === "Concluído") return "confirmed";
+  if (s === "Em andamento") return "review";
+  return "pending";
+}
+
+function formatarDataHora(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const data = formatarData(iso.slice(0, 10));
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${data} às ${hh}:${mm}`;
 }
 
 const navGroups: { label: string; items: { key: ModuleKey; label: string; icon: typeof LayoutDashboard; route: string }[] }[] = [
@@ -866,6 +1492,8 @@ const navGroups: { label: string; items: { key: ModuleKey; label: string; icon: 
 function SidebarNav({ active, onNavigate }: { active: ModuleKey; onNavigate: (route: string) => void }) {
   const { user, profile, signOut } = useAuth();
   const [, setLocation] = useLocation();
+  const { registros: encaminhamentos } = useRegistros<Encaminhamento>("encaminhamentos", encaminhamentosSemente);
+  const pendentes = encaminhamentos.filter((e) => e.status !== "Concluído").length;
   const go = (route: string) => { onNavigate(route); setLocation(route); };
   return (
     <div className="flex h-full flex-col">
@@ -888,8 +1516,8 @@ function SidebarNav({ active, onNavigate }: { active: ModuleKey; onNavigate: (ro
                   >
                     <Icon className={cn("size-4", isActive ? "text-[#A9533A]" : "text-[#607068]")} />
                     {item.label}
-                    {item.key === "encaminhamentos" && (
-                      <span className="ml-auto grid size-5 place-items-center rounded-full bg-[#F2E3DB] text-[13px] text-[#A9533A]">9</span>
+                    {item.key === "encaminhamentos" && pendentes > 0 && (
+                      <span className="ml-auto grid size-5 place-items-center rounded-full bg-[#F2E3DB] text-[13px] text-[#A9533A]">{pendentes}</span>
                     )}
                   </a>
                 );
@@ -933,7 +1561,7 @@ export function AdminWorkspace() {
   const { start, done } = useLoading();
   const { sessionExpired, setSessionExpired } = useAuth();
 
-  const content = active === "dashboard" ? <Dashboard /> : active === "conselhos" ? <CouncilRegisterView /> : active === "reunioes" ? <MeetingsView /> : active === "atas" ? <AtasView /> : active === "resolucoes" ? <ResolucoesView /> : active === "documentos" ? <DocumentsView /> : active === "relatorios" ? <AccountabilityReportView /> : <GenericModule active={active} />;
+  const content = active === "dashboard" ? <Dashboard /> : active === "conselhos" ? <CouncilRegisterView /> : active === "reunioes" ? <MeetingsView /> : active === "pautas" ? <PautasView /> : active === "votacoes" ? <VotacoesView /> : active === "atas" ? <AtasView /> : active === "resolucoes" ? <ResolucoesView /> : active === "documentos" ? <DocumentsView /> : active === "membros" ? <MembrosView /> : active === "mandatos" ? <MandatosView /> : active === "encaminhamentos" ? <EncaminhamentosView /> : active === "relatorios" ? <AccountabilityReportView /> : active === "auditoria" ? <AuditoriaView /> : active === "configuracoes" ? <ConfiguracoesView /> : <Dashboard />;
 
   const go = (route: string) => {
     if (route === location) return;

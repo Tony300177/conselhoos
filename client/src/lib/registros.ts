@@ -45,6 +45,93 @@ export type Documento = {
   file: string;
 };
 
+export type Pauta = {
+  id: string;
+  numero: string;
+  title: string;
+  council: string;
+  relator: string;
+  date: string;
+  status: string;
+};
+
+export type Votacao = {
+  id: string;
+  tema: string;
+  council: string;
+  date: string;
+  aFavor: number;
+  contra: number;
+  abstencoes: number;
+  resultado: string;
+};
+
+export type Membro = {
+  id: string;
+  nome: string;
+  entidade: string;
+  council: string;
+  papel: string;
+  status: string;
+};
+
+export type Mandato = {
+  id: string;
+  council: string;
+  titular: string;
+  entidade: string;
+  inicio: string;
+  fim: string;
+  situacao: string;
+};
+
+export type Encaminhamento = {
+  id: string;
+  decisao: string;
+  responsavel: string;
+  council: string;
+  prazo: string;
+  status: "Pendente" | "Em andamento" | "Concluído";
+};
+
+export type AuditoriaLog = {
+  id: string;
+  acao: string;
+  ator: string;
+  modulo: string;
+  data: string;
+};
+
+export type ConfigInstituicao = {
+  organizacao: string;
+  email: string;
+  periodicidade: string;
+  modeloAta: string;
+  regraPublicacao: string;
+};
+
+export function useConfigInstituicao(semente: ConfigInstituicao) {
+  const [config, setConfig] = useState<ConfigInstituicao>(() => {
+    try {
+      const bruto = localStorage.getItem(PREFIXO + "config");
+      if (bruto) return JSON.parse(bruto) as ConfigInstituicao;
+    } catch {
+      /* ignore */
+    }
+    return semente;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PREFIXO + "config", JSON.stringify(config));
+    } catch {
+      /* ignore */
+    }
+  }, [config]);
+
+  return { config, setConfig };
+}
+
 export function diaMes(data: string): { day: string; month: string } {
   const d = new Date(`${data}T00:00:00`);
   if (Number.isNaN(d.getTime())) return { day: "--", month: "MÊS" };
