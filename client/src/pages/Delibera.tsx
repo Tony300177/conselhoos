@@ -61,6 +61,8 @@ import { ModuleSkeleton } from "@/components/ModuleSkeleton";
 import { SessionExpiredDialog } from "@/components/SessionExpiredDialog";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRegistros, diaMes, type Reuniao, type Ata, type Resolucao, type Documento } from "@/lib/registros";
+import { podeCriarPagina, podePublicarPagina, LABEL_PERMISSAO } from "@/lib/permissoes";
 
 type ModuleKey = "dashboard" | "conselhos" | "membros" | "mandatos" | "reunioes" | "pautas" | "votacoes" | "atas" | "resolucoes" | "documentos" | "encaminhamentos" | "relatorios" | "auditoria" | "configuracoes";
 
@@ -129,10 +131,10 @@ const attendanceData = [
   { name: "Ausências", value: 12, color: "#E7E4DA" },
 ];
 
-const meetings = [
-  { day: "28", month: "AGO", title: "24ª Reunião Ordinária", council: "Conselho Municipal de Saúde", time: "14:00 – 16:30", status: "Confirmada", tone: "confirmed" },
-  { day: "30", month: "AGO", title: "Câmara Técnica de Orçamento", council: "Conselho de Desenvolvimento Urbano", time: "09:00 – 11:00", status: "Pauta em revisão", tone: "review" },
-  { day: "02", month: "SET", title: "Sessão deliberativa", council: "Conselho de Educação", time: "14:00 – 17:00", status: "Convocação pendente", tone: "pending" },
+const meetings: Reuniao[] = [
+  { id: "mtg-01", day: "28", month: "AGO", title: "24ª Reunião Ordinária", council: "Conselho Municipal de Saúde", time: "14:00 – 16:30", status: "Confirmada", tone: "confirmed" },
+  { id: "mtg-02", day: "30", month: "AGO", title: "Câmara Técnica de Orçamento", council: "Conselho de Desenvolvimento Urbano", time: "09:00 – 11:00", status: "Pauta em revisão", tone: "review" },
+  { id: "mtg-03", day: "02", month: "SET", title: "Sessão deliberativa", council: "Conselho de Educação", time: "14:00 – 17:00", status: "Convocação pendente", tone: "pending" },
 ];
 
 const councils = [
@@ -142,11 +144,21 @@ const councils = [
   { acronym: "CME", name: "Conselho Municipal de Educação", members: 22, meetings: "9 este ano", updated: "Atualizado em 25 ago.", color: "#B5974E" },
 ];
 
-const documents = [
-  { type: "ATA", title: "Ata da 23ª Reunião Ordinária", context: "Conselho Municipal de Saúde · 14 ago. 2026", status: "Publicado", file: "PDF · 1,8 MB" },
-  { type: "RES", title: "Resolução nº 18/2026", context: "Conselho de Educação · 12 ago. 2026", status: "Publicado", file: "PDF · 842 KB" },
-  { type: "PAUTA", title: "Pauta da 24ª Reunião Ordinária", context: "Conselho Municipal de Saúde · 28 ago. 2026", status: "Em revisão", file: "DOCX · 364 KB" },
-  { type: "REL", title: "Relatório de presença – 2º trimestre", context: "Gestão institucional · 10 ago. 2026", status: "Interno", file: "XLSX · 210 KB" },
+const documents: Documento[] = [
+  { id: "doc-01", type: "ATA", title: "Ata da 23ª Reunião Ordinária", context: "Conselho Municipal de Saúde · 14 ago. 2026", status: "Publicado", file: "PDF · 1,8 MB" },
+  { id: "doc-02", type: "RES", title: "Resolução nº 18/2026", context: "Conselho de Educação · 12 ago. 2026", status: "Publicado", file: "PDF · 842 KB" },
+  { id: "doc-03", type: "PAUTA", title: "Pauta da 24ª Reunião Ordinária", context: "Conselho Municipal de Saúde · 28 ago. 2026", status: "Em revisão", file: "DOCX · 364 KB" },
+  { id: "doc-04", type: "REL", title: "Relatório de presença – 2º trimestre", context: "Gestão institucional · 10 ago. 2026", status: "Interno", file: "XLSX · 210 KB" },
+];
+
+const atasSemente: Ata[] = [
+  { id: "ata-01", numero: "018/2026", title: "Ata da 23ª Reunião Ordinária", council: "Conselho Municipal de Saúde", date: "2026-08-14", status: "Publicada" },
+  { id: "ata-02", numero: "017/2026", title: "Ata da Reunião Extraordinária", council: "Conselho de Educação", date: "2026-07-30", status: "Em revisão" },
+];
+
+const resolucoesSemente: Resolucao[] = [
+  { id: "res-01", numero: "18/2026", title: "Aprovação do Plano Quadrienal de Saúde", council: "Conselho Municipal de Saúde", date: "2026-08-12", status: "Publicada" },
+  { id: "res-02", numero: "17/2026", title: "Diretrizes para o calendário letivo", council: "Conselho de Educação", date: "2026-07-25", status: "Aprovada" },
 ];
 
 function ActionButton({ children, onClick, className }: { children: React.ReactNode; onClick: () => void; className?: string }) {
@@ -330,7 +342,7 @@ function Dashboard() {
         <div className="p-6 sm:p-7">
           <div className="flex items-center justify-between gap-4"><StatusPill tone="confirmed">Ciclo ativo</StatusPill><span className="text-[13px] font-medium text-[#607068]">Quinta-feira, 28 de agosto</span></div>
           <div className="mt-6 max-w-xl"><p className="font-editorial text-[31px] font-semibold leading-[1.04] tracking-[-0.05em] text-[#193B32]">A manhã começa com <em className="font-normal text-[#A9533A]">clareza.</em></p><p className="mt-3 max-w-md text-[14px] leading-6 text-[#657268]">Há três encontros na agenda e duas deliberações aguardando encaminhamento. Escolha por onde continuar.</p></div>
-          <div className="mt-7 flex flex-wrap items-center gap-3"><ActionButton onClick={() => toast.success("A criação de reunião está pronta para ser conectada ao banco de dados.")}><Plus className="mr-2 size-4" />Criar reunião</ActionButton><button onClick={() => setLocation("/encaminhamentos")} className="inline-flex h-10 items-center gap-2 px-1 text-[13px] font-semibold text-[#285A43] transition hover:text-[#A9533A]">Ver pendências <ArrowRight className="size-4" /></button></div>
+          <div className="mt-7 flex flex-wrap items-center gap-3"><ActionButton onClick={() => setLocation("/reunioes")}><Plus className="mr-2 size-4" />Criar reunião</ActionButton><button onClick={() => setLocation("/encaminhamentos")} className="inline-flex h-10 items-center gap-2 px-1 text-[13px] font-semibold text-[#285A43] transition hover:text-[#A9533A]">Ver pendências <ArrowRight className="size-4" /></button></div>
         </div>
         <aside className="relative overflow-hidden bg-[#173F34] p-6 text-white">
           <div className="paper-stamp absolute -right-10 -top-9 size-40 rounded-full border border-white/15" />
@@ -387,21 +399,393 @@ function CouncilsView() {
 }
 
 function MeetingsView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
   const [filter, setFilter] = useState<"Todas" | "Confirmadas" | "Pendentes">("Todas");
-  const filtered = meetings.filter((meeting) => filter === "Todas" || (filter === "Confirmadas" ? meeting.tone === "confirmed" : meeting.tone !== "confirmed"));
-  return <div className="space-y-7"><section className="grid gap-5 border-b border-[#DDE2DB] pb-6 lg:grid-cols-[1fr_auto]"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Ciclo de 28 ago. a 04 set.</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">Três encontros exigem preparação.</p></div><div className="flex flex-wrap items-center gap-2">{(["Todas", "Confirmadas", "Pendentes"] as const).map((item) => <button key={item} onClick={() => setFilter(item)} className={cn("rounded-full px-3 py-1.5 text-[13px] font-bold transition", filter === item ? "bg-[#173F34] text-white" : "bg-[#EEF1EA] text-[#637066] hover:bg-[#E0E7DE]")}>{item}</button>)}</div></section><section className="divide-y divide-[#DFE4DC] border-y border-[#DDE2DB]">{filtered.map((meeting, index) => <article key={meeting.title} className="grid gap-4 px-1 py-5 sm:grid-cols-[78px_minmax(0,1fr)_auto] sm:px-3"><div className="flex gap-3 sm:block sm:border-r sm:border-[#DDE2DB]"><div className="font-editorial text-[39px] font-semibold leading-none tracking-[-0.07em] text-[#193B32]">{meeting.day}</div><div className="mt-1 text-[13px] font-bold tracking-[0.15em] text-[#A9533A]">{meeting.month} · 2026</div></div><div><div className="flex flex-wrap items-center gap-2"><h2 className="font-editorial text-[21px] font-semibold tracking-[-0.035em] text-[#193B32]">{meeting.title}</h2><StatusPill tone={meeting.tone as "confirmed" | "review" | "pending"}>{meeting.status}</StatusPill></div><p className="mt-2 text-[14px] text-[#657268]">{meeting.council}</p><div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-[#657268]"><span className="inline-flex items-center gap-1.5"><Clock3 className="size-3.5 text-[#768C75]" />{meeting.time}</span><span className="inline-flex items-center gap-1.5"><UsersRound className="size-3.5 text-[#768C75]" />{18 + index * 2} confirmações</span><span className="inline-flex items-center gap-1.5"><FileText className="size-3.5 text-[#768C75]" />{index === 0 ? "4 documentos" : "Pauta em andamento"}</span></div></div><div className="flex items-center sm:justify-end"><Button onClick={() => toast.success("Preparação da reunião selecionada.")} variant="outline" className="h-9 rounded-xl border-[#CBD4CA] bg-white px-3 text-[13px] font-bold text-[#285A43] hover:bg-[#EAF1E9]">Preparar <ArrowRight className="ml-1.5 size-3.5" /></Button></div></article>)}</section><section className="grid gap-px border border-[#DDE2DB] bg-[#DDE2DB] lg:grid-cols-3"><div className="bg-[#F6F7F2] p-5"><CircleDot className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Antes da reunião</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Pauta e convocação</p></div><div className="bg-[#F6F7F2] p-5"><Vote className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Durante</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Presença, quórum e votos</p></div><div className="bg-[#F6F7F2] p-5"><CheckCircle2 className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Depois</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Ata, resolução e ações</p></div></section></div>;
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar } = useRegistros<Reuniao>("reunioes", meetings);
+  const filtered = registros.filter((meeting) => filter === "Todas" || (filter === "Confirmadas" ? meeting.tone === "confirmed" : meeting.tone !== "confirmed"));
+  const salvar = (r: Omit<Reuniao, "id">): void => {
+    adicionar(r);
+    toast.success(`Reunião "${r.title}" agendada.`);
+  };
+  return <div className="space-y-7"><section className="grid gap-5 border-b border-[#DDE2DB] pb-6 lg:grid-cols-[1fr_auto]"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Ciclo de 28 ago. a 04 set.</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{filtered.length} encontros exigem preparação.</p></div><div className="flex flex-wrap items-center gap-2">{podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Nova reunião</ActionButton>}{(["Todas", "Confirmadas", "Pendentes"] as const).map((item) => <button key={item} onClick={() => setFilter(item)} className={cn("rounded-full px-3 py-1.5 text-[13px] font-bold transition", filter === item ? "bg-[#173F34] text-white" : "bg-[#EEF1EA] text-[#637066] hover:bg-[#E0E7DE]")}>{item}</button>)}</div></section><CreateReuniaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} /><section className="divide-y divide-[#DFE4DC] border-y border-[#DDE2DB]">{filtered.map((meeting, index) => <article key={meeting.title} className="grid gap-4 px-1 py-5 sm:grid-cols-[78px_minmax(0,1fr)_auto] sm:px-3"><div className="flex gap-3 sm:block sm:border-r sm:border-[#DDE2DB]"><div className="font-editorial text-[39px] font-semibold leading-none tracking-[-0.07em] text-[#193B32]">{meeting.day}</div><div className="mt-1 text-[13px] font-bold tracking-[0.15em] text-[#A9533A]">{meeting.month} · 2026</div></div><div><div className="flex flex-wrap items-center gap-2"><h2 className="font-editorial text-[21px] font-semibold tracking-[-0.035em] text-[#193B32]">{meeting.title}</h2><StatusPill tone={meeting.tone as "confirmed" | "review" | "pending"}>{meeting.status}</StatusPill></div><p className="mt-2 text-[14px] text-[#657268]">{meeting.council}</p><div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-[#657268]"><span className="inline-flex items-center gap-1.5"><Clock3 className="size-3.5 text-[#768C75]" />{meeting.time}</span><span className="inline-flex items-center gap-1.5"><UsersRound className="size-3.5 text-[#768C75]" />{18 + index * 2} confirmações</span><span className="inline-flex items-center gap-1.5"><FileText className="size-3.5 text-[#768C75]" />{index === 0 ? "4 documentos" : "Pauta em andamento"}</span></div></div><div className="flex items-center sm:justify-end"><Button onClick={() => toast.success("Preparação da reunião selecionada.")} variant="outline" className="h-9 rounded-xl border-[#CBD4CA] bg-white px-3 text-[13px] font-bold text-[#285A43] hover:bg-[#EAF1E9]">Preparar <ArrowRight className="ml-1.5 size-3.5" /></Button></div></article>)}</section><section className="grid gap-px border border-[#DDE2DB] bg-[#DDE2DB] lg:grid-cols-3"><div className="bg-[#F6F7F2] p-5"><CircleDot className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Antes da reunião</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Pauta e convocação</p></div><div className="bg-[#F6F7F2] p-5"><Vote className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Durante</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Presença, quórum e votos</p></div><div className="bg-[#F6F7F2] p-5"><CheckCircle2 className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Depois</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Ata, resolução e ações</p></div></section></div>;
 }
 
 function DocumentsView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
   const [type, setType] = useState("Todos");
-  const filtered = type === "Todos" ? documents : documents.filter((document) => document.type === type);
-  return <div className="space-y-7"><section className="relative overflow-hidden border border-[#DDE2DB] bg-[#F1EEE7] p-6"><div className="absolute inset-y-0 right-0 h-full w-[45%] bg-gradient-to-br from-[#173F34]/15 via-[#285A43]/10 to-transparent" /><div className="relative max-w-[530px]"><p className="text-[13px] font-bold uppercase tracking-[0.15em] text-[#A9533A]">Acervo institucional</p><h2 className="mt-2 font-editorial text-[29px] font-semibold leading-[1.04] tracking-[-0.05em] text-[#193B32]">Contexto, versão e publicação no mesmo documento.</h2><p className="mt-3 max-w-md text-[13px] leading-6 text-[#657268]">Cada arquivo guarda vínculo com o conselho, a reunião ou o processo que lhe dá origem.</p><ActionButton className="mt-5" onClick={() => toast.success("Envio de documento preparado para integração.")}><Plus className="mr-2 size-4" />Adicionar documento</ActionButton></div></section><section className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DDE2DB] pb-4"><div className="flex flex-wrap gap-2">{["Todos", "ATA", "RES", "PAUTA", "REL"].map((item) => <button key={item} onClick={() => setType(item)} className={cn("rounded-full px-3 py-1.5 text-[13px] font-bold transition", type === item ? "bg-[#173F34] text-white" : "bg-[#EEF1EA] text-[#637066] hover:bg-[#E0E7DE]")}>{item}</button>)}</div><p className="text-[13px] font-medium text-[#5E6C64]">{filtered.length} itens exibidos</p></section><section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">{filtered.map((document) => <article key={document.title} className="group grid gap-3 px-2 py-4 sm:grid-cols-[47px_minmax(0,1fr)_auto] sm:items-center sm:px-3"><div className="grid size-10 place-items-center rounded-xl bg-[#EAF0E7] text-[13px] font-black tracking-[0.08em] text-[#285A43]">{document.type}</div><div className="min-w-0"><p className="truncate text-[13px] font-bold text-[#294038]">{document.title}</p><p className="mt-1 truncate text-[13px] text-[#5E6C64]">{document.context} · {document.file}</p></div><div className="flex items-center gap-3"><StatusPill tone={document.status === "Publicado" ? "confirmed" : document.status === "Em revisão" ? "review" : "private"}>{document.status}</StatusPill><button onClick={() => toast.message(`Download de “${document.title}” estará disponível após a conexão com o armazenamento.`)} className="grid size-8 place-items-center rounded-lg text-[#526358] transition hover:bg-[#E5ECE3] hover:text-[#285A43]"><Download className="size-4" /></button></div></article>)}</section></div>;
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar } = useRegistros<Documento>("documentos", documents);
+  const filtered = type === "Todos" ? registros : registros.filter((document) => document.type === type);
+  const salvar = (d: Omit<Documento, "id">): void => {
+    adicionar(d);
+    toast.success(`Documento "${d.title}" adicionado.`);
+  };
+  return <div className="space-y-7"><section className="relative overflow-hidden border border-[#DDE2DB] bg-[#F1EEE7] p-6"><div className="absolute inset-y-0 right-0 h-full w-[45%] bg-gradient-to-br from-[#173F34]/15 via-[#285A43]/10 to-transparent" /><div className="relative max-w-[530px]"><p className="text-[13px] font-bold uppercase tracking-[0.15em] text-[#A9533A]">Acervo institucional</p><h2 className="mt-2 font-editorial text-[29px] font-semibold leading-[1.04] tracking-[-0.05em] text-[#193B32]">Contexto, versão e publicação no mesmo documento.</h2><p className="mt-3 max-w-md text-[13px] leading-6 text-[#657268]">Cada arquivo guarda vínculo com o conselho, a reunião ou o processo que lhe dá origem.</p>{podeCriar && <ActionButton className="mt-5" onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Adicionar documento</ActionButton>}</div></section><section className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DDE2DB] pb-4"><div className="flex flex-wrap gap-2">{["Todos", "ATA", "RES", "PAUTA", "REL"].map((item) => <button key={item} onClick={() => setType(item)} className={cn("rounded-full px-3 py-1.5 text-[13px] font-bold transition", type === item ? "bg-[#173F34] text-white" : "bg-[#EEF1EA] text-[#637066] hover:bg-[#E0E7DE]")}>{item}</button>)}</div><p className="text-[13px] font-medium text-[#5E6C64]">{filtered.length} itens exibidos</p></section><CriarDocumentoDialog open={createOpen} onOpenChange={setCreateOpen} onSave={salvar} /><section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">{filtered.map((document) => <article key={document.title} className="group grid gap-3 px-2 py-4 sm:grid-cols-[47px_minmax(0,1fr)_auto] sm:items-center sm:px-3"><div className="grid size-10 place-items-center rounded-xl bg-[#EAF0E7] text-[13px] font-black tracking-[0.08em] text-[#285A43]">{document.type}</div><div className="min-w-0"><p className="truncate text-[13px] font-bold text-[#294038]">{document.title}</p><p className="mt-1 truncate text-[13px] text-[#5E6C64]">{document.context} · {document.file}</p></div><div className="flex items-center gap-3"><StatusPill tone={document.status === "Publicado" ? "confirmed" : document.status === "Em revisão" ? "review" : "private"}>{document.status}</StatusPill><button onClick={() => toast.message(`Download de “${document.title}” estará disponível após a conexão com o armazenamento.`)} className="grid size-8 place-items-center rounded-lg text-[#526358] transition hover:bg-[#E5ECE3] hover:text-[#285A43]"><Download className="size-4" /></button></div></article>)}</section></div>;
 }
 
 function ReportsView() {
   const [active, setActive] = useState("Reuniões");
   const reports = ["Reuniões", "Presença", "Deliberações", "Resoluções", "Pendências"];
   return <div className="space-y-7"><section className="grid gap-7 border-b border-[#DDE2DB] pb-7 lg:grid-cols-[0.95fr_1.45fr]"><div><p className="text-[13px] font-bold uppercase tracking-[0.15em] text-[#A9533A]">Leitura de gestão</p><h2 className="mt-2 font-editorial text-[29px] font-semibold leading-[1.05] tracking-[-0.05em] text-[#193B32]">Dados que sustentam a prestação de contas.</h2><p className="mt-4 text-[13px] leading-6 text-[#657268]">Selecione o assunto e filtre o período antes de gerar uma visualização para consulta ou exportação.</p></div><div className="grid gap-3 sm:grid-cols-2"><label className="block"><span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#607068]">Conselho</span><div className="mt-2 flex h-11 items-center justify-between border border-[#D5DDD4] bg-[#FCFBF7] px-3 text-[14px] font-semibold text-[#526358]">Todos os conselhos <ChevronDown className="size-4" /></div></label><label className="block"><span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#607068]">Período</span><div className="mt-2 flex h-11 items-center justify-between border border-[#D5DDD4] bg-[#FCFBF7] px-3 text-[14px] font-semibold text-[#526358]">Jan – Ago 2026 <CalendarDays className="size-4" /></div></label><div className="sm:col-span-2"><ActionButton onClick={() => toast.success("Relatório gerado na visualização. A exportação será ativada com o backend.")}><BarChart3 className="mr-2 size-4" />Gerar análise</ActionButton></div></div></section><section className="grid gap-7 lg:grid-cols-[225px_minmax(0,1fr)]"><nav className="flex gap-1 overflow-x-auto border-b border-[#DDE2DB] pb-2 lg:block lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4">{reports.map((report, index) => <button key={report} onClick={() => setActive(report)} className={cn("flex shrink-0 items-center gap-3 px-3 py-2.5 text-left text-[14px] font-bold transition lg:w-full", active === report ? "bg-[#E8F0E8] text-[#285A43]" : "text-[#6F7B70] hover:bg-[#F2F4EF]")}><span className="text-[13px] text-[#A9533A]">0{index + 1}</span>{report}</button>)}</nav><article className="border border-[#DDE2DB] bg-[#FCFBF7] p-5 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#607068]">Relatório selecionado</p><h3 className="mt-1 font-editorial text-[24px] font-semibold tracking-[-0.04em] text-[#193B32]">{active} por período</h3></div><StatusPill tone="confirmed">Pronto para exportar</StatusPill></div><div className="mt-8 grid gap-px border border-[#DDE2DB] bg-[#DDE2DB] sm:grid-cols-3"><div className="bg-[#F7F8F4] p-4"><p className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#607068]">Total</p><p className="mt-2 font-editorial text-[29px] font-semibold tracking-[-0.05em] text-[#193B32]">{active === "Presença" ? "88%" : "36"}</p></div><div className="bg-[#F7F8F4] p-4"><p className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#607068]">Variação</p><p className="mt-2 font-editorial text-[29px] font-semibold tracking-[-0.05em] text-[#285A43]">+12%</p></div><div className="bg-[#F7F8F4] p-4"><p className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#607068]">Período</p><p className="mt-2 font-editorial text-[20px] font-semibold tracking-[-0.045em] text-[#193B32]">8 meses</p></div></div><div className="mt-7 flex h-32 items-end gap-2 border-b border-[#DDE2DB] pb-1">{[34, 55, 42, 75, 58, 89, 66, 96, 74, 86, 61, 84].map((height, index) => <div key={index} className="flex-1 bg-[#D6E2D5] transition hover:bg-[#285A43]" style={{ height: `${height}%` }} />)}</div><div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-[#6E7A70]"><span>Dados demonstrativos da interface.</span><button onClick={() => toast.message("A exportação em PDF será processada por função segura após a conexão do backend.")} className="inline-flex items-center gap-1.5 font-bold text-[#285A43]">Exportar PDF <Download className="size-3.5" /></button></div></article></section></div>;
+}
+
+function tonePublicacao(status: string): "confirmed" | "review" | "pending" {
+  if (["Publicada", "Aprovada"].includes(status)) return "confirmed";
+  if (status === "Em revisão") return "review";
+  return "pending";
+}
+
+function formatarData(data: string): string {
+  const d = new Date(`${data}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return data;
+  const meses = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+  return `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function CreateReuniaoDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (r: Omit<Reuniao, "id">) => void }) {
+  const [title, setTitle] = useState("");
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [time, setTime] = useState("09:00 – 12:00");
+  const [status, setStatus] = useState("Confirmada");
+  const tones: Record<string, Reuniao["tone"]> = { Confirmada: "confirmed", "Pauta em revisão": "review", "Convocação pendente": "pending" };
+  const statuses = ["Confirmada", "Pauta em revisão", "Convocação pendente"];
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Agendar reunião</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Cadastre o encontro e ele passa a integrar o ciclo com status e horário definidos.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label htmlFor="mt-title" className="text-[13px] font-bold text-[#405347]">Título da reunião</Label>
+            <Input id="mt-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: 25ª Reunião Ordinária" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="mt-date" className="text-[13px] font-bold text-[#405347]">Data</Label>
+              <Input id="mt-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="mt-time" className="text-[13px] font-bold text-[#405347]">Horário</Label>
+              <Input id="mt-time" value={time} onChange={(e) => setTime(e.target.value)} placeholder="09:00 – 12:00" className="text-[14px]" />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{statuses.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!title.trim() || !date}
+            onClick={() => {
+              const calc = diaMes(date);
+              onSave({ day: calc.day, month: calc.month, title: title.trim(), council: council || "Conselho não informado", time: time.trim(), status, tone: tones[status] ?? "pending" });
+              setTitle(""); setTime(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Agendar reunião
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CriarAtaDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (a: Omit<Ata, "id">) => void }) {
+  const [numero, setNumero] = useState("");
+  const [title, setTitle] = useState("");
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [status, setStatus] = useState("Rascunho");
+  const ano = new Date().getFullYear();
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Registrar nova ata</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Elabore a minuta da reunião. Ela entra no fluxo até a publicação oficial.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="ata-numero" className="text-[13px] font-bold text-[#405347]">Número</Label>
+              <Input id="ata-numero" value={numero} onChange={(e) => setNumero(e.target.value)} placeholder={`021/${ano}`} maxLength={10} className="text-[14px]" />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="ata-title" className="text-[13px] font-bold text-[#405347]">Título</Label>
+            <Input id="ata-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Ata da 25ª Reunião Ordinária" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="ata-date" className="text-[13px] font-bold text-[#405347]">Data</Label>
+              <Input id="ata-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{"Rascunho,Em revisão,Aprovada,Publicada".split(",").map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!title.trim()}
+            onClick={() => {
+              onSave({ numero: numero.trim() || `021/${ano}`, title: title.trim(), council: council || "Conselho não informado", date, status });
+              setNumero(""); setTitle(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Registrar ata
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CriarResolucaoDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (r: Omit<Resolucao, "id">) => void }) {
+  const [numero, setNumero] = useState("");
+  const [title, setTitle] = useState("");
+  const [council, setCouncil] = useState(councilNames[0] ?? "");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [status, setStatus] = useState("Minuta");
+  const ano = new Date().getFullYear();
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Registrar resolução</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Controle a numeração oficial e o vínculo com a deliberação que a originou.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label htmlFor="res-numero" className="text-[13px] font-bold text-[#405347]">Número</Label>
+            <Input id="res-numero" value={numero} onChange={(e) => setNumero(e.target.value)} placeholder={`19/${ano}`} maxLength={10} className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="res-title" className="text-[13px] font-bold text-[#405347]">Ementa / título</Label>
+            <Input id="res-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Aprovação do calendário anual de reuniões" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
+            <Select value={council} onValueChange={setCouncil}>
+              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="res-date" className="text-[13px] font-bold text-[#405347]">Data</Label>
+              <Input id="res-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{"Minuta,Aprovada,Publicada".split(",").map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!title.trim()}
+            onClick={() => {
+              onSave({ numero: numero.trim() || `19/${ano}`, title: title.trim(), council: council || "Conselho não informado", date, status });
+              setNumero(""); setTitle(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Registrar resolução
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CriarDocumentoDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; onSave: (d: Omit<Documento, "id">) => void }) {
+  const [type, setType] = useState<Documento["type"]>("ATA");
+  const [title, setTitle] = useState("");
+  const [context, setContext] = useState("");
+  const [status, setStatus] = useState<Documento["status"]>("Em revisão");
+  const [file, setFile] = useState("PDF · novo arquivo");
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Adicionar documento</DialogTitle>
+          <DialogDescription className="text-sm leading-6">Classifique o arquivo e defina sua visibilidade inicial no acervo.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Tipo</Label>
+              <Select value={type} onValueChange={(v) => setType(v as Documento["type"])}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{["ATA", "RES", "PAUTA", "REL"].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Status</Label>
+              <Select value={status} onValueChange={(v) => setStatus(v as Documento["status"])}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{["Publicado", "Em revisão", "Interno"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="doc-title" className="text-[13px] font-bold text-[#405347]">Título</Label>
+            <Input id="doc-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Pauta da 25ª Reunião Ordinária" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="doc-context" className="text-[13px] font-bold text-[#405347]">Contexto</Label>
+            <Input id="doc-context" value={context} onChange={(e) => setContext(e.target.value)} placeholder="Ex.: Conselho de Educação · 04 set. 2026" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="doc-file" className="text-[13px] font-bold text-[#405347]">Arquivo</Label>
+            <Input id="doc-file" value={file} onChange={(e) => setFile(e.target.value)} placeholder="PDF · 2,1 MB" className="text-[14px]" />
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
+          <Button
+            className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
+            disabled={!title.trim()}
+            onClick={() => {
+              onSave({ type, title: title.trim(), context: context.trim() || "Acervo institucional", status, file: file.trim() || "PDF · novo arquivo" });
+              setTitle(""); setContext(""); onOpenChange(false);
+            }}>
+            <Plus className="mr-2 size-4" />Adicionar documento
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AtasView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
+  const podePublicar = podePublicarPagina(profile?.role, isAdmin);
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar, atualizar } = useRegistros<Ata>("atas", atasSemente);
+  const salvar = (a: Omit<Ata, "id">): void => {
+    adicionar(a);
+    toast.success(`Ata ${a.numero} salva como ${a.status}.`);
+  };
+  const publicar = (a: Ata): void => {
+    atualizar(a.id, { status: "Publicada" });
+    toast.success(`Ata ${a.numero} publicada.`);
+  };
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Memória oficial</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} atas no acervo.</p>
+        </div>
+        {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Nova ata</ActionButton>}
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((ata) => (
+          <article key={ata.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div>
+              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">ATA {ata.numero}</p>
+              <p className="mt-1 text-[13px] text-[#5E6C64]">{formatarData(ata.date)}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{ata.title}</p>
+              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{ata.council}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <StatusPill tone={tonePublicacao(ata.status)}>{ata.status}</StatusPill>
+              {podePublicar && ata.status !== "Publicada" && (
+                <button onClick={() => publicar(ata)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#285A43] transition hover:bg-[#EAF1E9]">Publicar</button>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+      <CriarAtaDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+    </div>
+  );
+}
+
+function ResolucoesView() {
+  const { profile, isAdmin } = useAuth();
+  const podeCriar = podeCriarPagina(profile?.role, isAdmin);
+  const podePublicar = podePublicarPagina(profile?.role, isAdmin);
+  const [createOpen, setCreateOpen] = useState(false);
+  const { registros, adicionar, atualizar } = useRegistros<Resolucao>("resolucoes", resolucoesSemente);
+  const salvar = (r: Omit<Resolucao, "id">): void => {
+    adicionar(r);
+    toast.success(`Resolução ${r.numero} salva como ${r.status}.`);
+  };
+  const publicar = (r: Resolucao): void => {
+    atualizar(r.id, { status: "Publicada" });
+    toast.success(`Resolução ${r.numero} publicada.`);
+  };
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Publicação normativa</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} resoluções controladas.</p>
+        </div>
+        {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Nova resolução</ActionButton>}
+      </section>
+      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
+        {registros.map((res) => (
+          <article key={res.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3">
+            <div>
+              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">RES {res.numero}</p>
+              <p className="mt-1 text-[13px] text-[#5E6C64]">{formatarData(res.date)}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-bold text-[#294038]">{res.title}</p>
+              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{res.council}</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <StatusPill tone={tonePublicacao(res.status)}>{res.status}</StatusPill>
+              {podePublicar && res.status !== "Publicada" && (
+                <button onClick={() => publicar(res)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#285A43] transition hover:bg-[#EAF1E9]">Publicar</button>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+      <CriarResolucaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+    </div>
+  );
 }
 
 function ModuleRoadmapDialog({ open, onOpenChange, module }: { open: boolean; onOpenChange: (v: boolean) => void; module: ModuleKey }) {
@@ -528,7 +912,7 @@ function SidebarNav({ active, onNavigate }: { active: ModuleKey; onNavigate: (ro
           </Avatar>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-bold text-[#294038]">{profile?.full_name ?? user?.email ?? "Usuário"}</p>
-            <p className="truncate text-[13px] text-[#5E6C64]">{profile?.role ?? "membro"}</p>
+            <p className="truncate text-[13px] text-[#5E6C64]">{profile ? LABEL_PERMISSAO[profile.role] : "membro"}</p>
           </div>
         </div>
         <button onClick={async () => { await signOut(); setLocation("/"); }} className="mt-2 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-bold text-[#A9533A] transition hover:bg-[#FDF3ED] focus-visible:outline-none">
@@ -549,7 +933,7 @@ export function AdminWorkspace() {
   const { start, done } = useLoading();
   const { sessionExpired, setSessionExpired } = useAuth();
 
-  const content = active === "dashboard" ? <Dashboard /> : active === "conselhos" ? <CouncilRegisterView /> : active === "reunioes" ? <MeetingsView /> : active === "documentos" ? <DocumentsView /> : active === "relatorios" ? <AccountabilityReportView /> : <GenericModule active={active} />;
+  const content = active === "dashboard" ? <Dashboard /> : active === "conselhos" ? <CouncilRegisterView /> : active === "reunioes" ? <MeetingsView /> : active === "atas" ? <AtasView /> : active === "resolucoes" ? <ResolucoesView /> : active === "documentos" ? <DocumentsView /> : active === "relatorios" ? <AccountabilityReportView /> : <GenericModule active={active} />;
 
   const go = (route: string) => {
     if (route === location) return;
