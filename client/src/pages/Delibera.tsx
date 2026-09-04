@@ -284,14 +284,18 @@ const councilAreas = [
   "Participação Social",
 ];
 
-function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; onSave: (c: { acronym: string; area: string; name: string; members: number; meetings: string; updated: string; color: string }) => void }) {
+function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; onSave: (c: { acronym: string; area: string; name: string; members: number; meetings: string; updated: string; color: string; membros: { nome: string; papel: string }[]; mandatos: { titular: string; entidade: string; inicio: string; fim: string; situacao: string }[] }) => void }) {
   const [name, setName] = useState("");
   const [acronym, setAcronym] = useState("");
   const [area, setArea] = useState("Saúde");
   const [color, setColor] = useState("#173F34");
+  const [membros, setMembros] = useState<{ nome: string; papel: string }[]>([]);
+  const [mandatos, setMandatos] = useState<{ titular: string; entidade: string; inicio: string; fim: string; situacao: string }[]>([]);
+  const atualizarMembro = (i: number, campo: "nome" | "papel", valor: string) => setMembros((prev) => prev.map((m, j) => (j === i ? { ...m, [campo]: valor } : m)));
+  const atualizarMandato = (i: number, campo: "titular" | "entidade" | "inicio" | "fim" | "situacao", valor: string) => setMandatos((prev) => prev.map((m, j) => (j === i ? { ...m, [campo]: valor } : m)));
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Cadastrar novo conselho</DialogTitle>
           <DialogDescription className="text-sm leading-6">Preencha os dados básicos da instância para registrá-la no livro de colegiados.</DialogDescription>
@@ -316,6 +320,45 @@ function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
             <Label className="text-[13px] font-bold text-[#405347]">Cor de identificação</Label>
             <div className="flex flex-wrap gap-2">{councilColors.map((c) => <button key={c.value} type="button" onClick={() => setColor(c.value)} title={c.label} className="grid size-9 place-items-center rounded-full border-2 transition" style={{ background: c.value, borderColor: color === c.value ? "#173F34" : "transparent" }}>{color === c.value ? <Check className="size-4 text-white" /> : null}</button>)}</div>
           </div>
+          <div className="grid gap-4 rounded-xl border border-[#E1E5DE] bg-[#F7F8F3] p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[13px] font-bold text-[#405347]">Membros iniciais</p>
+              <button type="button" onClick={() => setMembros((prev) => [...prev, { nome: "", papel: "Titular" }])} className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]">+ Adicionar membro</button>
+            </div>
+            {membros.length === 0 ? <p className="text-[12px] text-[#8A948A]">Nenhum membro incluído. Ao registrar, eles são vinculados automaticamente ao conselho.</p> : membros.map((mb, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Input value={mb.nome} onChange={(e) => atualizarMembro(i, "nome", e.target.value)} placeholder="Nome do membro" className="min-w-0 flex-1 text-[14px]" />
+                <Select value={mb.papel} onValueChange={(v) => atualizarMembro(i, "papel", v)}>
+                  <SelectTrigger className="w-[120px] shrink-0 text-[14px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>{["Titular", "Suplente"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+                <button type="button" onClick={() => setMembros((prev) => prev.filter((_, j) => j !== i))} className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"><X className="size-4" /></button>
+              </div>
+            ))}
+            <div className="border-t border-[#E1E5DE] pt-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[13px] font-bold text-[#405347]">Mandatos iniciais</p>
+                <button type="button" onClick={() => setMandatos((prev) => [...prev, { titular: "", entidade: "", inicio: "2026-01-01", fim: "2027-12-31", situacao: "Vigente" }])} className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]">+ Adicionar mandato</button>
+              </div>
+              {mandatos.length === 0 ? <p className="text-[12px] text-[#8A948A]">Nenhum mandato incluído. Ao registrar, eles ficam vinculados ao conselho.</p> : mandatos.map((md, i) => (
+                <div key={i} className="mb-3 grid gap-2 rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] p-3">
+                  <div className="flex items-center gap-2">
+                    <Input value={md.titular} onChange={(e) => atualizarMandato(i, "titular", e.target.value)} placeholder="Titular" className="min-w-0 flex-1 text-[14px]" />
+                    <Input value={md.entidade} onChange={(e) => atualizarMandato(i, "entidade", e.target.value)} placeholder="Entidade" className="min-w-0 flex-1 text-[14px]" />
+                    <button type="button" onClick={() => setMandatos((prev) => prev.filter((_, j) => j !== i))} className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"><X className="size-4" /></button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input type="date" value={md.inicio} onChange={(e) => atualizarMandato(i, "inicio", e.target.value)} className="min-w-0 flex-1 text-[14px]" />
+                    <Input type="date" value={md.fim} onChange={(e) => atualizarMandato(i, "fim", e.target.value)} className="min-w-0 flex-1 text-[14px]" />
+                    <Select value={md.situacao} onValueChange={(v) => atualizarMandato(i, "situacao", v)}>
+                      <SelectTrigger className="w-[136px] shrink-0 text-[14px]"><SelectValue /></SelectTrigger>
+                      <SelectContent>{["Vigente", "Renovado", "Encerrado"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
@@ -323,9 +366,11 @@ function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
             className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
             disabled={!name.trim() || !acronym.trim()}
             onClick={() => {
-              onSave({ acronym: acronym.trim() || "NOV", area, name: name.trim(), members: 0, meetings: "0 este ano", updated: "Atualizado agora", color });
+              onSave({ acronym: acronym.trim() || "NOV", area, name: name.trim(), members: membros.length, meetings: "0 este ano", updated: "Atualizado agora", color, membros, mandatos });
               setName("");
               setAcronym("");
+              setMembros([]);
+              setMandatos([]);
               onOpenChange(false);
             }}>
             <Plus className="mr-2 size-4" />Registrar conselho
@@ -342,9 +387,14 @@ function CouncilRegisterView() {
   const { registros, adicionar } = useRegistros<Conselho>("conselhos", councils);
   const [, setLocation] = useLocation();
   const visible = useMemo(() => registros.filter((c) => `${c.acronym} ${c.name}`.toLowerCase().includes(query.toLowerCase())), [query, registros]);
-  const handleSave = (c: Omit<Conselho, "id">) => {
-    adicionar(c);
-    toast.success(`${c.name} criado com sucesso.`);
+  const { adicionar: adicionarMembro } = useRegistros<Membro>("membros", membrosSemente);
+  const { adicionar: adicionarMandato } = useRegistros<Mandato>("mandatos", mandatosSemente);
+  const handleSave = (c: Omit<Conselho, "id"> & { membros: { nome: string; papel: string }[]; mandatos: { titular: string; entidade: string; inicio: string; fim: string; situacao: string }[] }) => {
+    const { membros, mandatos, ...conselho } = c;
+    adicionar(conselho);
+    membros.forEach((mb) => adicionarMembro({ nome: mb.nome.trim(), entidade: "Representação a informar", council: conselho.name, papel: mb.papel, status: "Ativo" }));
+    mandatos.forEach((md) => adicionarMandato({ council: conselho.name, titular: md.titular.trim(), entidade: md.entidade.trim() || "Entidade a informar", inicio: md.inicio, fim: md.fim, situacao: md.situacao }));
+    toast.success(`${conselho.name} criado com ${membros.length} membro${membros.length === 1 ? "" : "s"} e ${mandatos.length} mandato${mandatos.length === 1 ? "" : "s"}.`);
   };
   return <><div className="space-y-7"><section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Livro de registros</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">Instâncias em exercício.</p></div><ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo conselho</ActionButton></section><section className="flex items-center gap-3 border border-[#DDE2DB] bg-[#FCFBF7] p-3"><Search className="size-4 text-[#6C786E]" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Localizar por nome ou sigla" className="h-8 border-0 bg-transparent p-0 text-[13px] shadow-none focus-visible:ring-0" /></section>{registros.length === 0 && <section className="border border-dashed border-[#C9D2C8] bg-[#FCFBF7] px-5 py-8 text-center"><p className="font-editorial text-[20px] font-semibold text-[#193B32]">Nenhum conselho cadastrado.</p><p className="mx-auto mt-2 max-w-md text-[13px] leading-5 text-[#657268]">O livro de registros está vazio. Use <strong>Novo conselho</strong> para cadastrar a primeira instância — ela passa a alimentar os demais módulos.</p></section>}<section className="border-y border-[#DDE2DB]"><div className="hidden grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] gap-4 border-b border-[#DDE2DB] bg-[#F0F3ED] px-4 py-2 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068] sm:grid"><span>Registro</span><span>Instância e contexto</span><span>Composição</span><span>Publicação</span><span /></div>{visible.map((c, i) => <button key={c.acronym} onClick={() => toast.message(`${c.name}: detalhe disponível após a conexão da base.`)} className="group grid w-full gap-3 border-b border-[#E1E5DE] px-4 py-4 text-left last:border-b-0 hover:bg-[#F4F7F1] sm:grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] sm:items-center sm:gap-4"><div className="flex items-center gap-2 sm:block"><span className="grid size-10 place-items-center rounded-full text-[13px] font-black tracking-[0.07em] text-white" style={{ background: c.color }}>{c.acronym}</span><p className="mt-2 text-[13px] font-bold tracking-[0.13em] text-[#A9533A]">0{i + 1} · 2026</p></div><div><p className="font-editorial text-[20px] font-semibold leading-[1.06] tracking-[-0.035em] text-[#193B32]">{c.name}</p><p className="mt-1 text-[13px] text-[#5E6C64]">Colegiado ativo · regimento e competências vinculados</p></div><div className="border-l border-[#E1E5DE] pl-3"><p className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#89938A]">Membros</p><p className="mt-1 text-[14px] font-bold text-[#405348]">{c.members} ativos</p></div><div className="border-l border-[#E1E5DE] pl-3"><StatusPill tone="confirmed">Atualizado</StatusPill><p className="mt-2 text-[13px] font-medium text-[#647166]">{c.updated}</p></div><ChevronRight className="size-4 justify-self-end text-[#9AA39A] transition-transform group-hover:translate-x-1 group-hover:text-[#285A43]" /></button>)}</section><button onClick={() => setLocation("/membros")} className="group flex w-full items-center justify-between border-b border-[#DDE2DB] py-4 text-left"><span className="text-[14px] font-bold text-[#536358]">Consultar composição e mandatos</span><ArrowRight className="size-4 text-[#285A43] transition-transform group-hover:translate-x-1" /></button></div><NewCouncilDialog open={createOpen} onOpenChange={setCreateOpen} onSave={handleSave} /></>;
 }
@@ -1237,6 +1287,8 @@ function MembrosView() {
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Membro>("membros", membrosSemente);
   const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
+  const [conselhoFiltro, setConselhoFiltro] = useState("Todos");
+  const filtrados = conselhoFiltro === "Todos" ? registros : registros.filter((m) => m.council === conselhoFiltro);
   const salvar = (m: Omit<Membro, "id">): void => {
     adicionar(m);
     toast.success(`Membro ${m.nome} cadastrado.`);
@@ -1250,12 +1302,18 @@ function MembrosView() {
       <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Composição colegiada</p>
-          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} membros representados.</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{filtrados.length} membros representados.</p>
         </div>
+        {conselhos.length > 0 && (
+          <Select value={conselhoFiltro} onValueChange={setConselhoFiltro}>
+            <SelectTrigger className="w-[240px] text-[14px]"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="Todos">Todos os conselhos</SelectItem>{conselhos.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+          </Select>
+        )}
         {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo membro</ActionButton>}
       </section>
       <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
-        {registros.map((m) => (
+        {filtrados.map((m) => (
           <article key={m.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:items-center sm:px-3">
             <div className="grid size-11 place-items-center rounded-full bg-[#D5E2D3] text-[14px] font-black text-[#285A43]">{m.nome.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}</div>
             <div className="min-w-0">
@@ -1283,6 +1341,8 @@ function MandatosView() {
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Mandato>("mandatos", mandatosSemente);
   const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
+  const [conselhoFiltro, setConselhoFiltro] = useState("Todos");
+  const filtrados = conselhoFiltro === "Todos" ? registros : registros.filter((m) => m.council === conselhoFiltro);
   const salvar = (m: Omit<Mandato, "id">): void => {
     adicionar(m);
     toast.success(`Mandato de ${m.titular} registrado.`);
@@ -1296,12 +1356,18 @@ function MandatosView() {
       <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Vigência e posse</p>
-          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{registros.length} mandatos controlados.</p>
+          <p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{filtrados.length} mandatos controlados.</p>
         </div>
+        {conselhos.length > 0 && (
+          <Select value={conselhoFiltro} onValueChange={setConselhoFiltro}>
+            <SelectTrigger className="w-[240px] text-[14px]"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="Todos">Todos os conselhos</SelectItem>{conselhos.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+          </Select>
+        )}
         {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo mandato</ActionButton>}
       </section>
       <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
-        {registros.map((m) => (
+        {filtrados.map((m) => (
           <article key={m.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-3">
             <div className="min-w-0">
               <p className="truncate text-[14px] font-bold text-[#294038]">{m.titular} <span className="font-semibold text-[#68756B]">· {m.entidade}</span></p>
