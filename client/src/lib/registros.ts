@@ -102,6 +102,17 @@ export type AuditoriaLog = {
   data: string;
 };
 
+export type Conselho = {
+  id: string;
+  acronym: string;
+  name: string;
+  area: string;
+  members: number;
+  meetings: string;
+  updated: string;
+  color: string;
+};
+
 export type ConfigInstituicao = {
   organizacao: string;
   email: string;

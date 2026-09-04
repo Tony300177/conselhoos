@@ -59,7 +59,7 @@ import { ModuleSkeleton } from "@/components/ModuleSkeleton";
 import { SessionExpiredDialog } from "@/components/SessionExpiredDialog";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRegistros, diaMes, useConfigInstituicao, type Reuniao, type Ata, type Resolucao, type Documento, type Pauta, type Votacao, type Membro, type Mandato, type Encaminhamento, type AuditoriaLog } from "@/lib/registros";
+import { useRegistros, diaMes, useConfigInstituicao, type Reuniao, type Ata, type Resolucao, type Documento, type Pauta, type Votacao, type Membro, type Mandato, type Encaminhamento, type AuditoriaLog, type Conselho } from "@/lib/registros";
 import { podeCriarPagina, podePublicarPagina, LABEL_PERMISSAO } from "@/lib/permissoes";
 
 type ModuleKey = "dashboard" | "conselhos" | "membros" | "mandatos" | "reunioes" | "pautas" | "votacoes" | "atas" | "resolucoes" | "documentos" | "encaminhamentos" | "relatorios" | "auditoria" | "configuracoes";
@@ -135,12 +135,7 @@ const meetings: Reuniao[] = [
   { id: "mtg-03", day: "02", month: "SET", title: "Sessão deliberativa", council: "Conselho de Educação", time: "14:00 – 17:00", status: "Convocação pendente", tone: "pending" },
 ];
 
-const councils = [
-  { acronym: "CMS", name: "Conselho Municipal de Saúde", members: 24, meetings: "14 este ano", updated: "Atualizado hoje", color: "#173F34" },
-  { acronym: "CMDH", name: "Conselho Municipal dos Direitos Humanos", members: 18, meetings: "8 este ano", updated: "Atualizado ontem", color: "#A9533A" },
-  { acronym: "CMU", name: "Conselho Municipal de Desenvolvimento Urbano", members: 20, meetings: "11 este ano", updated: "Atualizado em 26 ago.", color: "#768C75" },
-  { acronym: "CME", name: "Conselho Municipal de Educação", members: 22, meetings: "9 este ano", updated: "Atualizado em 25 ago.", color: "#B5974E" },
-];
+const councils: Conselho[] = [];
 
 const documents: Documento[] = [
   { id: "doc-01", type: "ATA", title: "Ata da 23ª Reunião Ordinária", context: "Conselho Municipal de Saúde · 14 ago. 2026", status: "Publicado", file: "PDF · 1,8 MB" },
@@ -289,7 +284,7 @@ const councilAreas = [
   "Participação Social",
 ];
 
-function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; onSave: (c: { acronym: string; name: string; members: number; meetings: string; updated: string; color: string }) => void }) {
+function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; onSave: (c: { acronym: string; area: string; name: string; members: number; meetings: string; updated: string; color: string }) => void }) {
   const [name, setName] = useState("");
   const [acronym, setAcronym] = useState("");
   const [area, setArea] = useState("Saúde");
@@ -328,7 +323,7 @@ function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
             className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
             disabled={!name.trim() || !acronym.trim()}
             onClick={() => {
-              onSave({ acronym: acronym.trim() || "NOV", name: name.trim(), members: 0, meetings: "0 este ano", updated: "Atualizado agora", color });
+              onSave({ acronym: acronym.trim() || "NOV", area, name: name.trim(), members: 0, meetings: "0 este ano", updated: "Atualizado agora", color });
               setName("");
               setAcronym("");
               onOpenChange(false);
@@ -344,14 +339,14 @@ function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
 function CouncilRegisterView() {
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
-  const [councilList, setCouncilList] = useState(councils);
+  const { registros, adicionar } = useRegistros<Conselho>("conselhos", councils);
   const [, setLocation] = useLocation();
-  const visible = useMemo(() => councilList.filter((c) => `${c.acronym} ${c.name}`.toLowerCase().includes(query.toLowerCase())), [query, councilList]);
-  const handleSave = (c: { acronym: string; name: string; members: number; meetings: string; updated: string; color: string }) => {
-    setCouncilList((prev) => [c, ...prev]);
+  const visible = useMemo(() => registros.filter((c) => `${c.acronym} ${c.name}`.toLowerCase().includes(query.toLowerCase())), [query, registros]);
+  const handleSave = (c: Omit<Conselho, "id">) => {
+    adicionar(c);
     toast.success(`${c.name} criado com sucesso.`);
   };
-  return <><div className="space-y-7"><section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Livro de registros</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">Instâncias em exercício.</p></div><ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo conselho</ActionButton></section><section className="flex items-center gap-3 border border-[#DDE2DB] bg-[#FCFBF7] p-3"><Search className="size-4 text-[#6C786E]" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Localizar por nome ou sigla" className="h-8 border-0 bg-transparent p-0 text-[13px] shadow-none focus-visible:ring-0" /></section><section className="border-y border-[#DDE2DB]"><div className="hidden grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] gap-4 border-b border-[#DDE2DB] bg-[#F0F3ED] px-4 py-2 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068] sm:grid"><span>Registro</span><span>Instância e contexto</span><span>Composição</span><span>Publicação</span><span /></div>{visible.map((c, i) => <button key={c.acronym} onClick={() => toast.message(`${c.name}: detalhe disponível após a conexão da base.`)} className="group grid w-full gap-3 border-b border-[#E1E5DE] px-4 py-4 text-left last:border-b-0 hover:bg-[#F4F7F1] sm:grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] sm:items-center sm:gap-4"><div className="flex items-center gap-2 sm:block"><span className="grid size-10 place-items-center rounded-full text-[13px] font-black tracking-[0.07em] text-white" style={{ background: c.color }}>{c.acronym}</span><p className="mt-2 text-[13px] font-bold tracking-[0.13em] text-[#A9533A]">0{i + 1} · 2026</p></div><div><p className="font-editorial text-[20px] font-semibold leading-[1.06] tracking-[-0.035em] text-[#193B32]">{c.name}</p><p className="mt-1 text-[13px] text-[#5E6C64]">Colegiado ativo · regimento e competências vinculados</p></div><div className="border-l border-[#E1E5DE] pl-3"><p className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#89938A]">Membros</p><p className="mt-1 text-[14px] font-bold text-[#405348]">{c.members} ativos</p></div><div className="border-l border-[#E1E5DE] pl-3"><StatusPill tone="confirmed">Atualizado</StatusPill><p className="mt-2 text-[13px] font-medium text-[#647166]">{c.updated}</p></div><ChevronRight className="size-4 justify-self-end text-[#9AA39A] transition-transform group-hover:translate-x-1 group-hover:text-[#285A43]" /></button>)}</section><button onClick={() => setLocation("/membros")} className="group flex w-full items-center justify-between border-b border-[#DDE2DB] py-4 text-left"><span className="text-[14px] font-bold text-[#536358]">Consultar composição e mandatos</span><ArrowRight className="size-4 text-[#285A43] transition-transform group-hover:translate-x-1" /></button></div><NewCouncilDialog open={createOpen} onOpenChange={setCreateOpen} onSave={handleSave} /></>;
+  return <><div className="space-y-7"><section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Livro de registros</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">Instâncias em exercício.</p></div><ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo conselho</ActionButton></section><section className="flex items-center gap-3 border border-[#DDE2DB] bg-[#FCFBF7] p-3"><Search className="size-4 text-[#6C786E]" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Localizar por nome ou sigla" className="h-8 border-0 bg-transparent p-0 text-[13px] shadow-none focus-visible:ring-0" /></section>{registros.length === 0 && <section className="border border-dashed border-[#C9D2C8] bg-[#FCFBF7] px-5 py-8 text-center"><p className="font-editorial text-[20px] font-semibold text-[#193B32]">Nenhum conselho cadastrado.</p><p className="mx-auto mt-2 max-w-md text-[13px] leading-5 text-[#657268]">O livro de registros está vazio. Use <strong>Novo conselho</strong> para cadastrar a primeira instância — ela passa a alimentar os demais módulos.</p></section>}<section className="border-y border-[#DDE2DB]"><div className="hidden grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] gap-4 border-b border-[#DDE2DB] bg-[#F0F3ED] px-4 py-2 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068] sm:grid"><span>Registro</span><span>Instância e contexto</span><span>Composição</span><span>Publicação</span><span /></div>{visible.map((c, i) => <button key={c.acronym} onClick={() => toast.message(`${c.name}: detalhe disponível após a conexão da base.`)} className="group grid w-full gap-3 border-b border-[#E1E5DE] px-4 py-4 text-left last:border-b-0 hover:bg-[#F4F7F1] sm:grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] sm:items-center sm:gap-4"><div className="flex items-center gap-2 sm:block"><span className="grid size-10 place-items-center rounded-full text-[13px] font-black tracking-[0.07em] text-white" style={{ background: c.color }}>{c.acronym}</span><p className="mt-2 text-[13px] font-bold tracking-[0.13em] text-[#A9533A]">0{i + 1} · 2026</p></div><div><p className="font-editorial text-[20px] font-semibold leading-[1.06] tracking-[-0.035em] text-[#193B32]">{c.name}</p><p className="mt-1 text-[13px] text-[#5E6C64]">Colegiado ativo · regimento e competências vinculados</p></div><div className="border-l border-[#E1E5DE] pl-3"><p className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#89938A]">Membros</p><p className="mt-1 text-[14px] font-bold text-[#405348]">{c.members} ativos</p></div><div className="border-l border-[#E1E5DE] pl-3"><StatusPill tone="confirmed">Atualizado</StatusPill><p className="mt-2 text-[13px] font-medium text-[#647166]">{c.updated}</p></div><ChevronRight className="size-4 justify-self-end text-[#9AA39A] transition-transform group-hover:translate-x-1 group-hover:text-[#285A43]" /></button>)}</section><button onClick={() => setLocation("/membros")} className="group flex w-full items-center justify-between border-b border-[#DDE2DB] py-4 text-left"><span className="text-[14px] font-bold text-[#536358]">Consultar composição e mandatos</span><ArrowRight className="size-4 text-[#285A43] transition-transform group-hover:translate-x-1" /></button></div><NewCouncilDialog open={createOpen} onOpenChange={setCreateOpen} onSave={handleSave} /></>;
 }
 
 function AccountabilityReportView() {
@@ -414,11 +409,11 @@ function Dashboard() {
 function CouncilsView() {
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
-  const [councilList, setCouncilList] = useState(councils);
+  const { registros, adicionar } = useRegistros<Conselho>("conselhos", councils);
   const [, setLocation] = useLocation();
-  const visible = useMemo(() => councilList.filter((council) => council.name.toLowerCase().includes(query.toLowerCase()) || council.acronym.toLowerCase().includes(query.toLowerCase())), [query, councilList]);
-  const handleSave = (c: { acronym: string; name: string; members: number; meetings: string; updated: string; color: string }) => {
-    setCouncilList((prev) => [c, ...prev]);
+  const visible = useMemo(() => registros.filter((council) => council.name.toLowerCase().includes(query.toLowerCase()) || council.acronym.toLowerCase().includes(query.toLowerCase())), [query, registros]);
+  const handleSave = (c: Omit<Conselho, "id">) => {
+    adicionar(c);
     toast.success(`${c.name} criado com sucesso.`);
   };
   return (
@@ -432,12 +427,13 @@ function MeetingsView() {
   const [filter, setFilter] = useState<"Todas" | "Confirmadas" | "Pendentes">("Todas");
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar } = useRegistros<Reuniao>("reunioes", meetings);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const filtered = registros.filter((meeting) => filter === "Todas" || (filter === "Confirmadas" ? meeting.tone === "confirmed" : meeting.tone !== "confirmed"));
   const salvar = (r: Omit<Reuniao, "id">): void => {
     adicionar(r);
     toast.success(`Reunião "${r.title}" agendada.`);
   };
-  return <div className="space-y-7"><section className="grid gap-5 border-b border-[#DDE2DB] pb-6 lg:grid-cols-[1fr_auto]"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Ciclo de 28 ago. a 04 set.</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{filtered.length} encontros exigem preparação.</p></div><div className="flex flex-wrap items-center gap-2">{podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Nova reunião</ActionButton>}{(["Todas", "Confirmadas", "Pendentes"] as const).map((item) => <button key={item} onClick={() => setFilter(item)} className={cn("rounded-full px-3 py-1.5 text-[13px] font-bold transition", filter === item ? "bg-[#173F34] text-white" : "bg-[#EEF1EA] text-[#637066] hover:bg-[#E0E7DE]")}>{item}</button>)}</div></section><CreateReuniaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} /><section className="divide-y divide-[#DFE4DC] border-y border-[#DDE2DB]">{filtered.map((meeting, index) => <article key={meeting.title} className="grid gap-4 px-1 py-5 sm:grid-cols-[78px_minmax(0,1fr)_auto] sm:px-3"><div className="flex gap-3 sm:block sm:border-r sm:border-[#DDE2DB]"><div className="font-editorial text-[39px] font-semibold leading-none tracking-[-0.07em] text-[#193B32]">{meeting.day}</div><div className="mt-1 text-[13px] font-bold tracking-[0.15em] text-[#A9533A]">{meeting.month} · 2026</div></div><div><div className="flex flex-wrap items-center gap-2"><h2 className="font-editorial text-[21px] font-semibold tracking-[-0.035em] text-[#193B32]">{meeting.title}</h2><StatusPill tone={meeting.tone as "confirmed" | "review" | "pending"}>{meeting.status}</StatusPill></div><p className="mt-2 text-[14px] text-[#657268]">{meeting.council}</p><div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-[#657268]"><span className="inline-flex items-center gap-1.5"><Clock3 className="size-3.5 text-[#768C75]" />{meeting.time}</span><span className="inline-flex items-center gap-1.5"><UsersRound className="size-3.5 text-[#768C75]" />{18 + index * 2} confirmações</span><span className="inline-flex items-center gap-1.5"><FileText className="size-3.5 text-[#768C75]" />{index === 0 ? "4 documentos" : "Pauta em andamento"}</span></div></div><div className="flex items-center sm:justify-end"><Button onClick={() => toast.success("Preparação da reunião selecionada.")} variant="outline" className="h-9 rounded-xl border-[#CBD4CA] bg-white px-3 text-[13px] font-bold text-[#285A43] hover:bg-[#EAF1E9]">Preparar <ArrowRight className="ml-1.5 size-3.5" /></Button></div></article>)}</section><section className="grid gap-px border border-[#DDE2DB] bg-[#DDE2DB] lg:grid-cols-3"><div className="bg-[#F6F7F2] p-5"><CircleDot className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Antes da reunião</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Pauta e convocação</p></div><div className="bg-[#F6F7F2] p-5"><Vote className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Durante</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Presença, quórum e votos</p></div><div className="bg-[#F6F7F2] p-5"><CheckCircle2 className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Depois</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Ata, resolução e ações</p></div></section></div>;
+  return <div className="space-y-7"><section className="grid gap-5 border-b border-[#DDE2DB] pb-6 lg:grid-cols-[1fr_auto]"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Ciclo de 28 ago. a 04 set.</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">{filtered.length} encontros exigem preparação.</p></div><div className="flex flex-wrap items-center gap-2">{podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Nova reunião</ActionButton>}{(["Todas", "Confirmadas", "Pendentes"] as const).map((item) => <button key={item} onClick={() => setFilter(item)} className={cn("rounded-full px-3 py-1.5 text-[13px] font-bold transition", filter === item ? "bg-[#173F34] text-white" : "bg-[#EEF1EA] text-[#637066] hover:bg-[#E0E7DE]")}>{item}</button>)}</div></section><CreateReuniaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} /><section className="divide-y divide-[#DFE4DC] border-y border-[#DDE2DB]">{filtered.map((meeting, index) => <article key={meeting.title} className="grid gap-4 px-1 py-5 sm:grid-cols-[78px_minmax(0,1fr)_auto] sm:px-3"><div className="flex gap-3 sm:block sm:border-r sm:border-[#DDE2DB]"><div className="font-editorial text-[39px] font-semibold leading-none tracking-[-0.07em] text-[#193B32]">{meeting.day}</div><div className="mt-1 text-[13px] font-bold tracking-[0.15em] text-[#A9533A]">{meeting.month} · 2026</div></div><div><div className="flex flex-wrap items-center gap-2"><h2 className="font-editorial text-[21px] font-semibold tracking-[-0.035em] text-[#193B32]">{meeting.title}</h2><StatusPill tone={meeting.tone as "confirmed" | "review" | "pending"}>{meeting.status}</StatusPill></div><p className="mt-2 text-[14px] text-[#657268]">{meeting.council}</p><div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-[#657268]"><span className="inline-flex items-center gap-1.5"><Clock3 className="size-3.5 text-[#768C75]" />{meeting.time}</span><span className="inline-flex items-center gap-1.5"><UsersRound className="size-3.5 text-[#768C75]" />{18 + index * 2} confirmações</span><span className="inline-flex items-center gap-1.5"><FileText className="size-3.5 text-[#768C75]" />{index === 0 ? "4 documentos" : "Pauta em andamento"}</span></div></div><div className="flex items-center sm:justify-end"><Button onClick={() => toast.success("Preparação da reunião selecionada.")} variant="outline" className="h-9 rounded-xl border-[#CBD4CA] bg-white px-3 text-[13px] font-bold text-[#285A43] hover:bg-[#EAF1E9]">Preparar <ArrowRight className="ml-1.5 size-3.5" /></Button></div></article>)}</section><section className="grid gap-px border border-[#DDE2DB] bg-[#DDE2DB] lg:grid-cols-3"><div className="bg-[#F6F7F2] p-5"><CircleDot className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Antes da reunião</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Pauta e convocação</p></div><div className="bg-[#F6F7F2] p-5"><Vote className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Durante</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Presença, quórum e votos</p></div><div className="bg-[#F6F7F2] p-5"><CheckCircle2 className="size-5 text-[#A9533A]" /><p className="mt-4 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068]">Depois</p><p className="mt-2 font-editorial text-[19px] font-semibold text-[#193B32]">Ata, resolução e ações</p></div></section></div>;
 }
 
 function DocumentsView() {
@@ -726,6 +722,7 @@ function AtasView() {
   const podePublicar = podePublicarPagina(profile?.role, isAdmin);
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Ata>("atas", atasSemente);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const salvar = (a: Omit<Ata, "id">): void => {
     adicionar(a);
     toast.success(`Ata ${a.numero} salva como ${a.status}.`);
@@ -763,7 +760,7 @@ function AtasView() {
           </article>
         ))}
       </section>
-      <CriarAtaDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+      <CriarAtaDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
     </div>
   );
 }
@@ -774,6 +771,7 @@ function ResolucoesView() {
   const podePublicar = podePublicarPagina(profile?.role, isAdmin);
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Resolucao>("resolucoes", resolucoesSemente);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const salvar = (r: Omit<Resolucao, "id">): void => {
     adicionar(r);
     toast.success(`Resolução ${r.numero} salva como ${r.status}.`);
@@ -811,7 +809,7 @@ function ResolucoesView() {
           </article>
         ))}
       </section>
-      <CriarResolucaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+      <CriarResolucaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
     </div>
   );
 }
@@ -1150,6 +1148,7 @@ function PautasView() {
   const podePublicar = podePublicarPagina(profile?.role, isAdmin);
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Pauta>("pautas", pautasSemente);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const salvar = (p: Omit<Pauta, "id">): void => {
     adicionar(p);
     toast.success(`Pauta ${p.numero} registrada.`);
@@ -1187,7 +1186,7 @@ function PautasView() {
           </article>
         ))}
       </section>
-      <CriarPautaDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+      <CriarPautaDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
     </div>
   );
 }
@@ -1197,6 +1196,7 @@ function VotacoesView() {
   const podeCriar = podeCriarPagina(profile?.role, isAdmin);
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar } = useRegistros<Votacao>("votacoes", votacoesSemente);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const salvar = (v: Omit<Votacao, "id">): void => {
     adicionar(v);
     toast.success(`Votação "${v.tema}" registrada como ${v.resultado}.`);
@@ -1225,7 +1225,7 @@ function VotacoesView() {
           </article>
         ))}
       </section>
-      <CriarVotacaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+      <CriarVotacaoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
     </div>
   );
 }
@@ -1236,6 +1236,7 @@ function MembrosView() {
   const podePublicar = podePublicarPagina(profile?.role, isAdmin);
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Membro>("membros", membrosSemente);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const salvar = (m: Omit<Membro, "id">): void => {
     adicionar(m);
     toast.success(`Membro ${m.nome} cadastrado.`);
@@ -1270,7 +1271,7 @@ function MembrosView() {
           </article>
         ))}
       </section>
-      <CriarMembroDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+      <CriarMembroDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
     </div>
   );
 }
@@ -1281,6 +1282,7 @@ function MandatosView() {
   const podePublicar = podePublicarPagina(profile?.role, isAdmin);
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Mandato>("mandatos", mandatosSemente);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const salvar = (m: Omit<Mandato, "id">): void => {
     adicionar(m);
     toast.success(`Mandato de ${m.titular} registrado.`);
@@ -1314,7 +1316,7 @@ function MandatosView() {
           </article>
         ))}
       </section>
-      <CriarMandatoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+      <CriarMandatoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
     </div>
   );
 }
@@ -1325,6 +1327,7 @@ function EncaminhamentosView() {
   const podePublicar = podePublicarPagina(profile?.role, isAdmin);
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Encaminhamento>("encaminhamentos", encaminhamentosSemente);
+  const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
   const pendentes = registros.filter((e) => e.status !== "Concluído").length;
   const salvar = (e: Omit<Encaminhamento, "id">): void => {
     adicionar(e);
@@ -1359,7 +1362,7 @@ function EncaminhamentosView() {
           </article>
         ))}
       </section>
-      <CriarEncaminhamentoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={councils.map((c) => c.name)} onSave={salvar} />
+      <CriarEncaminhamentoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
     </div>
   );
 }
