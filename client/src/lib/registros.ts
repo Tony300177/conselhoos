@@ -73,16 +73,24 @@ export type Membro = {
   council: string;
   papel: string;
   status: string;
+  telefone: string;
+  endereco: string;
 };
 
 export type Mandato = {
   id: string;
   council: string;
   titular: string;
+  cargo: string;
   entidade: string;
   inicio: string;
   fim: string;
+  numeroAto: string;
+  tipoAto: string;
+  dataAto: string;
+  documento: string;
   situacao: string;
+  observacoes: string;
 };
 
 export type Encaminhamento = {

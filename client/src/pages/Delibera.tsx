@@ -44,6 +44,7 @@ import { CivicMark } from "@/components/CivicMark";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -59,6 +60,7 @@ import { ModuleSkeleton } from "@/components/ModuleSkeleton";
 import { SessionExpiredDialog } from "@/components/SessionExpiredDialog";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useRegistros, diaMes, useConfigInstituicao, type Reuniao, type Ata, type Resolucao, type Documento, type Pauta, type Votacao, type Membro, type Mandato, type Encaminhamento, type AuditoriaLog, type Conselho } from "@/lib/registros";
 import { podeCriarPagina, podePublicarPagina, LABEL_PERMISSAO } from "@/lib/permissoes";
 
@@ -165,13 +167,13 @@ const votacoesSemente: Votacao[] = [
 ];
 
 const membrosSemente: Membro[] = [
-  { id: "mem-01", nome: "Ana Sousa", entidade: "Secretaria Municipal de Saúde", council: "Conselho Municipal de Saúde", papel: "Titular", status: "Ativo" },
-  { id: "mem-02", nome: "Carlos Lima", entidade: "Sindicato dos Professores", council: "Conselho de Educação", papel: "Suplente", status: "Ativo" },
+  { id: "mem-01", nome: "Ana Sousa", entidade: "Secretaria Municipal de Saúde", council: "Conselho Municipal de Saúde", papel: "Titular", status: "Ativo", telefone: "(11) 99999-1234", endereco: "Rua das Flores, 123 - São Paulo/SP" },
+  { id: "mem-02", nome: "Carlos Lima", entidade: "Sindicato dos Professores", council: "Conselho de Educação", papel: "Suplente", status: "Ativo", telefone: "(11) 98888-5678", endereco: "Av. Paulista, 456 - São Paulo/SP" },
 ];
 
 const mandatosSemente: Mandato[] = [
-  { id: "man-01", council: "Conselho Municipal de Saúde", titular: "Ana Sousa", entidade: "Secretaria Municipal de Saúde", inicio: "2025-01-01", fim: "2026-12-31", situacao: "Vigente" },
-  { id: "man-02", council: "Conselho de Educação", titular: "Paula Neves", entidade: "Associação de Pais e Mestres", inicio: "2024-03-01", fim: "2026-02-28", situacao: "Encerrado" },
+  { id: "man-01", council: "Conselho Municipal de Saúde", titular: "Ana Sousa", cargo: "Presidente", entidade: "Secretaria Municipal de Saúde", inicio: "2025-01-01", fim: "2026-12-31", numeroAto: "Portaria nº 118/2024", tipoAto: "Portaria", dataAto: "2024-12-15", documento: "", situacao: "Vigente", observacoes: "Mandato de 2 anos, com posse em 01/01/2025." },
+  { id: "man-02", council: "Conselho de Educação", titular: "Paula Neves", cargo: "Vice-Presidente", entidade: "Associação de Pais e Mestres", inicio: "2024-03-01", fim: "2026-02-28", numeroAto: "Decreto nº 92/2023", tipoAto: "Decreto", dataAto: "2023-11-20", documento: "", situacao: "Encerrado", observacoes: "Mandato concluído sem prorrogação." },
 ];
 
 const encaminhamentosSemente: Encaminhamento[] = [
@@ -392,8 +394,8 @@ function CouncilRegisterView() {
   const handleSave = (c: Omit<Conselho, "id"> & { membros: { nome: string; papel: string }[]; mandatos: { titular: string; entidade: string; inicio: string; fim: string; situacao: string }[] }) => {
     const { membros, mandatos, ...conselho } = c;
     adicionar(conselho);
-    membros.forEach((mb) => adicionarMembro({ nome: mb.nome.trim(), entidade: "Representação a informar", council: conselho.name, papel: mb.papel, status: "Ativo" }));
-    mandatos.forEach((md) => adicionarMandato({ council: conselho.name, titular: md.titular.trim(), entidade: md.entidade.trim() || "Entidade a informar", inicio: md.inicio, fim: md.fim, situacao: md.situacao }));
+    membros.forEach((mb) => adicionarMembro({ nome: mb.nome.trim(), entidade: "Representação a informar", council: conselho.name, papel: mb.papel, status: "Ativo", telefone: "", endereco: "" }));
+    mandatos.forEach((md) => adicionarMandato({ council: conselho.name, titular: md.titular.trim(), cargo: "Conselheiro(a)", entidade: md.entidade.trim() || "Entidade a informar", inicio: md.inicio, fim: md.fim, numeroAto: "", tipoAto: "Portaria", dataAto: "", documento: "", situacao: md.situacao, observacoes: "" }));
     toast.success(`${conselho.name} criado com ${membros.length} membro${membros.length === 1 ? "" : "s"} e ${mandatos.length} mandato${mandatos.length === 1 ? "" : "s"}.`);
   };
   return <><div className="space-y-7"><section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">Livro de registros</p><p className="mt-2 font-editorial text-[28px] font-semibold tracking-[-0.045em] text-[#193B32]">Instâncias em exercício.</p></div><ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo conselho</ActionButton></section><section className="flex items-center gap-3 border border-[#DDE2DB] bg-[#FCFBF7] p-3"><Search className="size-4 text-[#6C786E]" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Localizar por nome ou sigla" className="h-8 border-0 bg-transparent p-0 text-[13px] shadow-none focus-visible:ring-0" /></section>{registros.length === 0 && <section className="border border-dashed border-[#C9D2C8] bg-[#FCFBF7] px-5 py-8 text-center"><p className="font-editorial text-[20px] font-semibold text-[#193B32]">Nenhum conselho cadastrado.</p><p className="mx-auto mt-2 max-w-md text-[13px] leading-5 text-[#657268]">O livro de registros está vazio. Use <strong>Novo conselho</strong> para cadastrar a primeira instância — ela passa a alimentar os demais módulos.</p></section>}<section className="border-y border-[#DDE2DB]"><div className="hidden grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] gap-4 border-b border-[#DDE2DB] bg-[#F0F3ED] px-4 py-2 text-[13px] font-bold uppercase tracking-[0.13em] text-[#607068] sm:grid"><span>Registro</span><span>Instância e contexto</span><span>Composição</span><span>Publicação</span><span /></div>{visible.map((c, i) => <button key={c.acronym} onClick={() => toast.message(`${c.name}: detalhe disponível após a conexão da base.`)} className="group grid w-full gap-3 border-b border-[#E1E5DE] px-4 py-4 text-left last:border-b-0 hover:bg-[#F4F7F1] sm:grid-cols-[68px_minmax(0,1.4fr)_0.6fr_0.7fr_24px] sm:items-center sm:gap-4"><div className="flex items-center gap-2 sm:block"><span className="grid size-10 place-items-center rounded-full text-[13px] font-black tracking-[0.07em] text-white" style={{ background: c.color }}>{c.acronym}</span><p className="mt-2 text-[13px] font-bold tracking-[0.13em] text-[#A9533A]">0{i + 1} · 2026</p></div><div><p className="font-editorial text-[20px] font-semibold leading-[1.06] tracking-[-0.035em] text-[#193B32]">{c.name}</p><p className="mt-1 text-[13px] text-[#5E6C64]">Colegiado ativo · regimento e competências vinculados</p></div><div className="border-l border-[#E1E5DE] pl-3"><p className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#89938A]">Membros</p><p className="mt-1 text-[14px] font-bold text-[#405348]">{c.members} ativos</p></div><div className="border-l border-[#E1E5DE] pl-3"><StatusPill tone="confirmed">Atualizado</StatusPill><p className="mt-2 text-[13px] font-medium text-[#647166]">{c.updated}</p></div><ChevronRight className="size-4 justify-self-end text-[#9AA39A] transition-transform group-hover:translate-x-1 group-hover:text-[#285A43]" /></button>)}</section><button onClick={() => setLocation("/membros")} className="group flex w-full items-center justify-between border-b border-[#DDE2DB] py-4 text-left"><span className="text-[14px] font-bold text-[#536358]">Consultar composição e mandatos</span><ArrowRight className="size-4 text-[#285A43] transition-transform group-hover:translate-x-1" /></button></div><NewCouncilDialog open={createOpen} onOpenChange={setCreateOpen} onSave={handleSave} /></>;
@@ -1007,15 +1009,17 @@ function CriarVotacaoDialog({ open, onOpenChange, councilNames, onSave }: { open
 function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (m: Omit<Membro, "id">) => void }) {
   const [nome, setNome] = useState("");
   const [entidade, setEntidade] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [endereco, setEndereco] = useState("");
   const [council, setCouncil] = useState(councilNames[0] ?? "");
   const [papel, setPapel] = useState("Titular");
   const [status, setStatus] = useState("Ativo");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Cadastrar membro</DialogTitle>
-          <DialogDescription className="text-sm leading-6">Registre a representação, a entidade e a situação de participação.</DialogDescription>
+          <DialogDescription className="text-sm leading-6">Registre a representação, a entidade, o contato e a situação de participação.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2">
           <div className="grid gap-2">
@@ -1025,6 +1029,16 @@ function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open:
           <div className="grid gap-2">
             <Label htmlFor="mem-entidade" className="text-[13px] font-bold text-[#405347]">Entidade / representação</Label>
             <Input id="mem-entidade" value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Ex.: Secretaria Municipal de Saúde" className="text-[14px]" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="mem-telefone" className="text-[13px] font-bold text-[#405347]">Número de celular</Label>
+              <Input id="mem-telefone" value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="Ex.: (11) 99999-0000" className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="mem-endereco" className="text-[13px] font-bold text-[#405347]">Endereço</Label>
+              <Input id="mem-endereco" value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Ex.: Rua das Flores, 123" className="text-[14px]" />
+            </div>
           </div>
           <div className="grid gap-2">
             <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
@@ -1056,8 +1070,8 @@ function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open:
             className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
             disabled={!nome.trim()}
             onClick={() => {
-              onSave({ nome: nome.trim(), entidade: entidade.trim() || "Representação a informar", council: council || "Conselho não informado", papel, status });
-              setNome(""); setEntidade(""); onOpenChange(false);
+              onSave({ nome: nome.trim(), entidade: entidade.trim() || "Representação a informar", council: council || "Conselho não informado", papel, status, telefone: telefone.trim(), endereco: endereco.trim() });
+              setNome(""); setEntidade(""); setTelefone(""); setEndereco(""); onOpenChange(false);
             }}>
             <Plus className="mr-2 size-4" />Cadastrar membro
           </Button>
@@ -1067,63 +1081,190 @@ function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open:
   );
 }
 
-function CriarMandatoDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (m: Omit<Mandato, "id">) => void }) {
+const CARGOS_MANDATO = ["Presidente", "Vice-Presidente", "Conselheiro(a)", "Secretário(a) Executivo(a)", "Secretário(a)", "Relator(a)", "Suplente"];
+const TIPOS_ATO = ["Portaria", "Decreto", "Lei", "Resolução", "Ata de posse"];
+const SITUACOES_MANDATO = ["Vigente", "Aguarda posse", "Suspenso", "Revogado", "Encerrado"];
+
+function situacaoCalculada(inicio: string, fim: string): string {
+  const hoje = new Date();
+  const hojeISO = hoje.toISOString().slice(0, 10);
+  if (inicio && hojeISO < inicio) return "Aguarda posse";
+  if (fim && hojeISO > fim) return "Encerrado";
+  return "Vigente";
+}
+
+function CriarMandatoDialog({ open, onOpenChange, councilNames, membros, mandatos, onSave }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  councilNames: string[];
+  membros: Membro[];
+  mandatos: Mandato[];
+  onSave: (m: Omit<Mandato, "id">) => void;
+}) {
   const [council, setCouncil] = useState(councilNames[0] ?? "");
   const [titular, setTitular] = useState("");
+  const [cargo, setCargo] = useState(CARGOS_MANDATO[0]);
   const [entidade, setEntidade] = useState("");
-  const [inicio, setInicio] = useState("2026-01-01");
-  const [fim, setFim] = useState("2027-12-31");
-  const [situacao, setSituacao] = useState("Vigente");
+  const [inicio, setInicio] = useState("");
+  const [fim, setFim] = useState("");
+  const [numeroAto, setNumeroAto] = useState("");
+  const [tipoAto, setTipoAto] = useState(TIPOS_ATO[0]);
+  const [dataAto, setDataAto] = useState("");
+  const [documento, setDocumento] = useState("");
+  const [situacao, setSituacao] = useState("");
+  const [observacoes, setObservacoes] = useState("");
+
+  const titularNomes = Array.from(new Set(membros.map((m) => m.nome).filter(Boolean)));
+  const entidades = Array.from(new Set(membros.map((m) => m.entidade).filter(Boolean)));
+
+  const periodoValido = inicio && fim && fim >= inicio;
+  const camposObrigatorios = council && titular && entidade && inicio && fim;
+
+  const conflito = mandatos.some((m) => {
+    if (m.council !== council || m.titular !== titular) return false;
+    if (m.situacao !== "Vigente" && m.situacao !== "Aguarda posse") return false;
+    const sobrepoe = inicio <= m.fim && fim >= m.inicio;
+    return sobrepoe;
+  });
+
+  const podeSalvar = camposObrigatorios && periodoValido && !conflito;
+
+  const salvar = () => {
+    const situ = situacao || situacaoCalculada(inicio, fim);
+    onSave({
+      council,
+      titular,
+      cargo,
+      entidade,
+      inicio,
+      fim,
+      numeroAto: numeroAto.trim(),
+      tipoAto,
+      dataAto,
+      documento: documento.trim(),
+      situacao: situ,
+      observacoes: observacoes.trim(),
+    });
+    setTitular(""); setEntidade(""); setInicio(""); setFim(""); setNumeroAto(""); setDataAto(""); setDocumento(""); setObservacoes(""); onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-editorial text-xl font-semibold text-[#193B32]">Registrar mandato</DialogTitle>
-          <DialogDescription className="text-sm leading-6">Vincule a nomeação ao titular, à entidade e ao período de exercício.</DialogDescription>
+          <DialogDescription className="text-sm leading-6">Vincule o titular ao conselho, à entidade e ao período de exercício.</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">Conselho</Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
-              <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="man-titular" className="text-[13px] font-bold text-[#405347]">Titular</Label>
-            <Input id="man-titular" value={titular} onChange={(e) => setTitular(e.target.value)} placeholder="Ex.: Maria Oliveira" className="text-[14px]" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="man-entidade" className="text-[13px] font-bold text-[#405347]">Entidade</Label>
-            <Input id="man-entidade" value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Ex.: Secretaria Municipal de Saúde" className="text-[14px]" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="grid max-h-[60vh] gap-5 overflow-y-auto pr-1 py-2">
+          <div className="space-y-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">Identificação</p>
             <div className="grid gap-2">
-              <Label htmlFor="man-inicio" className="text-[13px] font-bold text-[#405347]">Início</Label>
-              <Input id="man-inicio" type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} className="text-[14px]" />
+              <Label className="text-[13px] font-bold text-[#405347]">Conselho *</Label>
+              <Select value={council} onValueChange={setCouncil}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{councilNames.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="man-fim" className="text-[13px] font-bold text-[#405347]">Fim</Label>
-              <Input id="man-fim" type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="text-[14px]" />
+              <Label className="text-[13px] font-bold text-[#405347]">Titular *</Label>
+              {titularNomes.length > 0 ? (
+                <Select value={titular} onValueChange={setTitular}>
+                  <SelectTrigger className="w-full text-[14px]"><SelectValue placeholder="Selecione o membro..." /></SelectTrigger>
+                  <SelectContent>{titularNomes.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+                </Select>
+              ) : (
+                <Input value={titular} onChange={(e) => setTitular(e.target.value)} placeholder="Nome do titular" className="text-[14px]" />
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">Cargo / função</Label>
+                <Select value={cargo} onValueChange={setCargo}>
+                  <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>{CARGOS_MANDATO.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">Entidade *</Label>
+                {entidades.length > 0 ? (
+                  <Select value={entidade} onValueChange={setEntidade}>
+                    <SelectTrigger className="w-full text-[14px]"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>{entidades.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <Input value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Entidade representada" className="text-[14px]" />
+                )}
+              </div>
             </div>
           </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">Situação</Label>
-            <Select value={situacao} onValueChange={setSituacao}>
-              <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
-              <SelectContent>{["Vigente", "Renovado", "Encerrado"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-            </Select>
+
+          <div className="space-y-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">Período do mandato</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label htmlFor="man-inicio" className="text-[13px] font-bold text-[#405347]">Início *</Label>
+                <Input id="man-inicio" type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} className="text-[14px]" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="man-fim" className="text-[13px] font-bold text-[#405347]">Fim *</Label>
+                <Input id="man-fim" type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="text-[14px]" />
+              </div>
+            </div>
+            {inicio && fim && fim < inicio && (
+              <p className="text-[12px] font-medium text-[#B45309]">Fim anterior ao início: ajuste o período do mandato.</p>
+            )}
+            {conflito && (
+              <p className="text-[12px] font-medium text-[#A9533A]">Já existe um mandato vigente para este titular neste conselho no período informado.</p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">Ato de nomeação</p>
+            <div className="grid gap-2">
+              <Label htmlFor="man-numero-ato" className="text-[13px] font-bold text-[#405347]">Número do ato</Label>
+              <Input id="man-numero-ato" value={numeroAto} onChange={(e) => setNumeroAto(e.target.value)} placeholder="Ex.: Portaria nº 123/2026" className="text-[14px]" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">Tipo do ato</Label>
+                <Select value={tipoAto} onValueChange={setTipoAto}>
+                  <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>{TIPOS_ATO.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="man-data-ato" className="text-[13px] font-bold text-[#405347]">Data do ato</Label>
+                <Input id="man-data-ato" type="date" value={dataAto} onChange={(e) => setDataAto(e.target.value)} className="text-[14px]" />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="man-documento" className="text-[13px] font-bold text-[#405347]">Documento (portaria / decreto)</Label>
+              <Input id="man-documento" value={documento} onChange={(e) => setDocumento(e.target.value)} placeholder="Nome ou link do documento" className="text-[14px]" />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">Situação</p>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">Situação</Label>
+              <Select value={situacao} onValueChange={setSituacao}>
+                <SelectTrigger className="w-full text-[14px]"><SelectValue placeholder={inicio || fim ? `Automática: ${situacaoCalculada(inicio, fim)}` : "Automática pelo período"} /></SelectTrigger>
+                <SelectContent>{SITUACOES_MANDATO.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+              <p className="text-[12px] text-[#7A867B]">Deixe em branco para cálculo automático pela data de hoje e o período do mandato.</p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="man-obs" className="text-[13px] font-bold text-[#405347]">Observações</Label>
+              <Textarea id="man-obs" value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Contexto da nomeação, prorrogações, substituições..." className="text-[14px]" />
+            </div>
           </div>
         </div>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild><Button variant="outline" className="text-[14px]">Cancelar</Button></DialogClose>
           <Button
             className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
-            disabled={!titular.trim()}
-            onClick={() => {
-              onSave({ council: council || "Conselho não informado", titular: titular.trim(), entidade: entidade.trim() || "Entidade a informar", inicio, fim, situacao });
-              setTitular(""); setEntidade(""); onOpenChange(false);
-            }}>
+            disabled={!podeSalvar}
+            onClick={salvar}>
             <Plus className="mr-2 size-4" />Registrar mandato
           </Button>
         </DialogFooter>
@@ -1341,6 +1482,7 @@ function MandatosView() {
   const [createOpen, setCreateOpen] = useState(false);
   const { registros, adicionar, atualizar } = useRegistros<Mandato>("mandatos", mandatosSemente);
   const { registros: conselhos } = useRegistros<Conselho>("conselhos", councils);
+  const { registros: membros } = useRegistros<Membro>("membros", membrosSemente);
   const [conselhoFiltro, setConselhoFiltro] = useState("Todos");
   const filtrados = conselhoFiltro === "Todos" ? registros : registros.filter((m) => m.council === conselhoFiltro);
   const salvar = (m: Omit<Mandato, "id">): void => {
@@ -1366,23 +1508,44 @@ function MandatosView() {
         )}
         {podeCriar && <ActionButton onClick={() => setCreateOpen(true)}><Plus className="mr-2 size-4" />Novo mandato</ActionButton>}
       </section>
-      <section className="divide-y divide-[#E1E5DE] border-y border-[#DDE2DB]">
-        {filtrados.map((m) => (
-          <article key={m.id} className="grid gap-3 px-2 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-3">
-            <div className="min-w-0">
-              <p className="truncate text-[14px] font-bold text-[#294038]">{m.titular} <span className="font-semibold text-[#68756B]">· {m.entidade}</span></p>
-              <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{m.council} · {formatarData(m.inicio)} a {formatarData(m.fim)}</p>
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <StatusPill tone={toneMandato(m.situacao)}>{m.situacao}</StatusPill>
-              {podePublicar && m.situacao === "Vigente" && (
-                <button onClick={() => encerrar(m)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#A9533A] transition hover:bg-[#FDF3ED]">Encerrar</button>
-              )}
-            </div>
-          </article>
-        ))}
+      <section className="overflow-hidden rounded-xl border border-[#DDE2DB]">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-[#F5F6F2] hover:bg-[#F5F6F2]">
+              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Conselho</TableHead>
+              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Titular</TableHead>
+              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Cargo</TableHead>
+              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Entidade</TableHead>
+              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Período</TableHead>
+              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Ato</TableHead>
+              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Situação</TableHead>
+              <TableHead className="px-4 text-end text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtrados.map((m) => (
+              <TableRow key={m.id}>
+                <TableCell className="px-4 font-semibold text-[#294038]">{m.council}</TableCell>
+                <TableCell className="px-4">
+                  <p className="font-bold text-[#294038]">{m.titular}</p>
+                  {m.observacoes && <p className="max-w-[220px] truncate text-[12px] text-[#7A867B]">{m.observacoes}</p>}
+                </TableCell>
+                <TableCell className="px-4 text-[#5E6C64]">{m.cargo}</TableCell>
+                <TableCell className="px-4 text-[#5E6C64]">{m.entidade}</TableCell>
+                <TableCell className="px-4 whitespace-nowrap text-[#5E6C64]">{formatarData(m.inicio)} <span className="text-[#A8B1A8]">→</span> {formatarData(m.fim)}</TableCell>
+                <TableCell className="px-4 text-[#5E6C64]">{(m.numeroAto || m.tipoAto) ? `${m.numeroAto || m.tipoAto}${m.dataAto ? ` · ${formatarData(m.dataAto)}` : ""}` : "—"}</TableCell>
+                <TableCell className="px-4"><StatusPill tone={toneMandato(m.situacao)}>{m.situacao}</StatusPill></TableCell>
+                <TableCell className="px-4 text-end">
+                  {podePublicar && m.situacao === "Vigente" && (
+                    <button onClick={() => encerrar(m)} className="rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] px-3 py-1.5 text-[13px] font-bold text-[#A9533A] transition hover:bg-[#FDF3ED]">Encerrar</button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </section>
-      <CriarMandatoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} onSave={salvar} />
+      <CriarMandatoDialog open={createOpen} onOpenChange={setCreateOpen} councilNames={conselhos.map((c) => c.name)} membros={membros} mandatos={registros} onSave={salvar} />
     </div>
   );
 }
@@ -1531,9 +1694,9 @@ function statusMembroTone(s: string): "confirmed" | "review" | "pending" {
   return "pending";
 }
 
-function toneMandato(s: string): "confirmed" | "review" | "pending" {
-  if (s === "Renovado") return "confirmed";
+function toneMandato(s: string): "confirmed" | "review" | "pending" | "danger" {
   if (s === "Vigente") return "confirmed";
+  if (s === "Suspenso" || s === "Revogado") return s === "Revogado" ? "danger" : "review";
   return "pending";
 }
 
