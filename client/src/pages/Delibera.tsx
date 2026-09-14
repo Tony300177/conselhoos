@@ -167,8 +167,8 @@ const votacoesSemente: Votacao[] = [
 ];
 
 const membrosSemente: Membro[] = [
-  { id: "mem-01", nome: "Ana Sousa", entidade: "Secretaria Municipal de Saúde", council: "Conselho Municipal de Saúde", papel: "Titular", status: "Ativo", telefone: "(11) 99999-1234", endereco: "Rua das Flores, 123 - São Paulo/SP" },
-  { id: "mem-02", nome: "Carlos Lima", entidade: "Sindicato dos Professores", council: "Conselho de Educação", papel: "Suplente", status: "Ativo", telefone: "(11) 98888-5678", endereco: "Av. Paulista, 456 - São Paulo/SP" },
+  { id: "mem-01", nome: "Ana Sousa", email: "ana.sousa@saude.sp.gov.br", cpf: "123.456.789-00", entidade: "Secretaria Municipal de Saúde", council: "Conselho Municipal de Saúde", papel: "Titular", status: "Ativo", telefone: "(11) 99999-1234", endereco: "Rua das Flores, 123 - São Paulo/SP" },
+  { id: "mem-02", nome: "Carlos Lima", email: "carlos.lima@sindicato.org.br", cpf: "987.654.321-00", entidade: "Sindicato dos Professores", council: "Conselho de Educação", papel: "Suplente", status: "Ativo", telefone: "(11) 98888-5678", endereco: "Av. Paulista, 456 - São Paulo/SP" },
 ];
 
 const mandatosSemente: Mandato[] = [
@@ -286,10 +286,12 @@ const councilAreas = [
   "Participação Social",
 ];
 
-function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; onSave: (c: { acronym: string; area: string; name: string; members: number; meetings: string; updated: string; color: string; membros: { nome: string; papel: string }[]; mandatos: { titular: string; entidade: string; inicio: string; fim: string; situacao: string }[] }) => void }) {
+function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; onSave: (c: { acronym: string; area: string; segmento: string; regulamentacao: string; name: string; members: number; meetings: string; updated: string; color: string; membros: { nome: string; papel: string }[]; mandatos: { titular: string; entidade: string; inicio: string; fim: string; situacao: string }[] }) => void }) {
   const [name, setName] = useState("");
   const [acronym, setAcronym] = useState("");
   const [area, setArea] = useState("Saúde");
+  const [segmento, setSegmento] = useState("");
+  const [regulamentacao, setRegulamentacao] = useState("");
   const [color, setColor] = useState("#173F34");
   const [membros, setMembros] = useState<{ nome: string; papel: string }[]>([]);
   const [mandatos, setMandatos] = useState<{ titular: string; entidade: string; inicio: string; fim: string; situacao: string }[]>([]);
@@ -317,6 +319,14 @@ function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
               <SelectTrigger className="w-full text-[14px]"><SelectValue /></SelectTrigger>
               <SelectContent>{councilAreas.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}</SelectContent>
             </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="council-segmento" className="text-[13px] font-bold text-[#405347]">Segmento</Label>
+            <Input id="council-segmento" value={segmento} onChange={(e) => setSegmento(e.target.value)} placeholder="Ex.: Governo · Sociedade civil · Trabalhadores" className="text-[14px]" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="council-regulamentacao" className="text-[13px] font-bold text-[#405347]">Regulamentação</Label>
+            <Textarea id="council-regulamentacao" value={regulamentacao} onChange={(e) => setRegulamentacao(e.target.value)} placeholder="Ex.: Lei Municipal nº 1.234/2020, que institui e regulamenta o Conselho..." className="min-h-[72px] resize-y text-[14px]" />
           </div>
           <div className="grid gap-2">
             <Label className="text-[13px] font-bold text-[#405347]">Cor de identificação</Label>
@@ -368,9 +378,11 @@ function NewCouncilDialog({ open, onOpenChange, onSave }: { open: boolean; onOpe
             className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
             disabled={!name.trim() || !acronym.trim()}
             onClick={() => {
-              onSave({ acronym: acronym.trim() || "NOV", area, name: name.trim(), members: membros.length, meetings: "0 este ano", updated: "Atualizado agora", color, membros, mandatos });
+              onSave({ acronym: acronym.trim() || "NOV", area, segmento: segmento.trim(), regulamentacao: regulamentacao.trim(), name: name.trim(), members: membros.length, meetings: "0 este ano", updated: "Atualizado agora", color, membros, mandatos });
               setName("");
               setAcronym("");
+              setSegmento("");
+              setRegulamentacao("");
               setMembros([]);
               setMandatos([]);
               onOpenChange(false);
@@ -394,7 +406,7 @@ function CouncilRegisterView() {
   const handleSave = (c: Omit<Conselho, "id"> & { membros: { nome: string; papel: string }[]; mandatos: { titular: string; entidade: string; inicio: string; fim: string; situacao: string }[] }) => {
     const { membros, mandatos, ...conselho } = c;
     adicionar(conselho);
-    membros.forEach((mb) => adicionarMembro({ nome: mb.nome.trim(), entidade: "Representação a informar", council: conselho.name, papel: mb.papel, status: "Ativo", telefone: "", endereco: "" }));
+    membros.forEach((mb) => adicionarMembro({ nome: mb.nome.trim(), email: "", cpf: "", entidade: "Representação a informar", council: conselho.name, papel: mb.papel, status: "Ativo", telefone: "", endereco: "" }));
     mandatos.forEach((md) => adicionarMandato({ council: conselho.name, titular: md.titular.trim(), cargo: "Conselheiro(a)", entidade: md.entidade.trim() || "Entidade a informar", inicio: md.inicio, fim: md.fim, numeroAto: "", tipoAto: "Portaria", dataAto: "", documento: "", situacao: md.situacao, observacoes: "" }));
     toast.success(`${conselho.name} criado com ${membros.length} membro${membros.length === 1 ? "" : "s"} e ${mandatos.length} mandato${mandatos.length === 1 ? "" : "s"}.`);
   };
@@ -1008,6 +1020,8 @@ function CriarVotacaoDialog({ open, onOpenChange, councilNames, onSave }: { open
 
 function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; councilNames: string[]; onSave: (m: Omit<Membro, "id">) => void }) {
   const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [cpf, setCpf] = useState("");
   const [entidade, setEntidade] = useState("");
   const [telefone, setTelefone] = useState("");
   const [endereco, setEndereco] = useState("");
@@ -1025,6 +1039,16 @@ function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open:
           <div className="grid gap-2">
             <Label htmlFor="mem-nome" className="text-[13px] font-bold text-[#405347]">Nome completo</Label>
             <Input id="mem-nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Maria Oliveira" className="text-[14px]" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="mem-email" className="text-[13px] font-bold text-[#405347]">E-mail</Label>
+              <Input id="mem-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Ex.: maria@exemplo.gov.br" className="text-[14px]" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="mem-cpf" className="text-[13px] font-bold text-[#405347]">CPF</Label>
+              <Input id="mem-cpf" value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="Ex.: 123.456.789-00" className="text-[14px]" />
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="mem-entidade" className="text-[13px] font-bold text-[#405347]">Entidade / representação</Label>
@@ -1070,8 +1094,8 @@ function CriarMembroDialog({ open, onOpenChange, councilNames, onSave }: { open:
             className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
             disabled={!nome.trim()}
             onClick={() => {
-              onSave({ nome: nome.trim(), entidade: entidade.trim() || "Representação a informar", council: council || "Conselho não informado", papel, status, telefone: telefone.trim(), endereco: endereco.trim() });
-              setNome(""); setEntidade(""); setTelefone(""); setEndereco(""); onOpenChange(false);
+              onSave({ nome: nome.trim(), email: email.trim(), cpf: cpf.trim(), entidade: entidade.trim() || "Representação a informar", council: council || "Conselho não informado", papel, status, telefone: telefone.trim(), endereco: endereco.trim() });
+              setNome(""); setEmail(""); setCpf(""); setEntidade(""); setTelefone(""); setEndereco(""); onOpenChange(false);
             }}>
             <Plus className="mr-2 size-4" />Cadastrar membro
           </Button>
@@ -1460,6 +1484,7 @@ function MembrosView() {
             <div className="min-w-0">
               <p className="truncate text-[14px] font-bold text-[#294038]">{m.nome} <span className="font-semibold text-[#68756B]">· {m.papel}</span></p>
               <p className="mt-1 truncate text-[13px] text-[#5E6C64]">{m.entidade} · {m.council}</p>
+              <p className="mt-0.5 truncate text-[12px] text-[#8A948A]">{m.cpf && <>CPF {m.cpf} · </>}{m.email}</p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
               <StatusPill tone={statusMembroTone(m.status)}>{m.status}</StatusPill>

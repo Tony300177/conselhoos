@@ -69,6 +69,8 @@ export type Votacao = {
 export type Membro = {
   id: string;
   nome: string;
+  email: string;
+  cpf: string;
   entidade: string;
   council: string;
   papel: string;
@@ -115,6 +117,8 @@ export type Conselho = {
   acronym: string;
   name: string;
   area: string;
+  segmento: string;
+  regulamentacao: string;
   members: number;
   meetings: string;
   updated: string;
