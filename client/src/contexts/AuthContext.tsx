@@ -15,6 +15,7 @@ const LOCAL_SESSION_KEY = "delibera.admin.session";
 // está definida. É um portão de UX para a demo, não autorização: os registros
 // vivem no localStorage e o controle real de acesso será o RLS do Supabase.
 const DEMO_ADMIN_EMAIL = "admin@delibera.local";
+const LOCAL_ADMIN_ID = "admin-local";
 const DEMO_ADMIN_PASSWORD: string | undefined = import.meta.env
   .VITE_DEMO_ADMIN_PASSWORD;
 const demoAdminAtivo = Boolean(DEMO_ADMIN_PASSWORD);
@@ -40,7 +41,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const LOCAL_ADMIN_PROFILE: UserProfile = {
-  id: "admin-local",
+  id: LOCAL_ADMIN_ID,
   full_name: "Administrador",
   email: DEMO_ADMIN_EMAIL,
   avatar_url: null,
@@ -51,7 +52,7 @@ const LOCAL_ADMIN_PROFILE: UserProfile = {
 
 function makeLocalAdminUser(): User {
   return {
-    id: "admin-local",
+    id: LOCAL_ADMIN_ID,
     app_metadata: {},
     user_metadata: { full_name: "Administrador" },
     aud: "authenticated",
@@ -101,11 +102,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(
     localSession?.profile ?? null
   );
-  const [loading, setLoading] = useState(!localSession);
+  // Sem Supabase e sem sessao local nao existe consulta pendente, entao a
+  // interface ja nasce resolvida em vez de_travar esperando um carregamento
+  // que nunca acontece.
+  const [loading, setLoading] = useState(Boolean(supabase) && !localSession);
   const [sessionExpired, setSessionExpired] = useState(false);
   const wasAuthenticatedRef = useRef(Boolean(localSession?.user));
 
   async function fetchProfile(userId: string) {
+    // O usuario do bypass local ja tem o perfil montado; sem Supabase nao ha
+    // profiles para consultar.
+    if (!supabase || userId === LOCAL_ADMIN_ID) return;
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
@@ -115,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    if (localSession) return;
+    if (localSession || !supabase) return;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -158,6 +165,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSessionExpired(false);
       return { error: null };
     }
+    if (!supabase) {
+      return {
+        error: new Error(
+          "Supabase não configurado. Só é possível entrar pelo modo de demonstração."
+        ),
+      };
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -169,6 +183,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    if (!supabase) {
+      return {
+        error: new Error(
+          "Supabase não configurado: o cadastro exige o backend."
+        ),
+      };
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -183,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setSessionExpired(false);
+    if (!supabase) return;
     try {
       await supabase.auth.signOut();
     } catch {
@@ -195,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isAdmin =
-    profile?.role === "administrador" || user?.id === "admin-local";
+    profile?.role === "administrador" || user?.id === LOCAL_ADMIN_ID;
 
   return (
     <AuthContext.Provider
