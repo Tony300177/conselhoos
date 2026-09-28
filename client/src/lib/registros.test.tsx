@@ -197,3 +197,73 @@ describe("useRegistros", () => {
     expect(screen.getByTestId("len-B").textContent).toBe("0");
   });
 });
+
+describe("payload corrompido no localStorage", () => {
+  it("cai na semente quando a chave guarda um objeto em vez de lista", () => {
+    localStorage.setItem(
+      "delibera.registros.atas",
+      JSON.stringify({ naoSouLista: true })
+    );
+
+    montar();
+
+    expect(screen.getByTestId("len-A").textContent).toBe("1");
+    expect(screen.getByTestId("nomes-A").textContent).toBe("Semente A");
+  });
+
+  it("cai na semente quando a chave guarda uma lista invalida em JSON", () => {
+    localStorage.setItem("delibera.registros.atas", "{isto nao e json");
+
+    montar();
+
+    expect(screen.getByTestId("len-A").textContent).toBe("1");
+    expect(screen.getByTestId("nomes-A").textContent).toBe("Semente A");
+  });
+
+  it("se recupera gravando por cima do payload corrompido", () => {
+    localStorage.setItem(
+      "delibera.registros.atas",
+      JSON.stringify({ naoSouLista: true })
+    );
+    montar();
+
+    act(() => {
+      screen.getByTestId("add-A").click();
+    });
+
+    const persistido = JSON.parse(
+      localStorage.getItem("delibera.registros.atas") as string
+    ) as Linha[];
+    expect(Array.isArray(persistido)).toBe(true);
+    expect(persistido[0]?.nome).toBe("Novo de A");
+    expect(screen.getByTestId("len-B").textContent).toBe("2");
+  });
+
+  it("ignora gravacao de outra aba que viola o formato da chave", () => {
+    montar();
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "delibera.registros.atas",
+          newValue: JSON.stringify({ naoSouLista: true }),
+        })
+      );
+    });
+
+    expect(screen.getByTestId("len-A").textContent).toBe("1");
+    expect(screen.getByTestId("nomes-A").textContent).toBe("Semente A");
+  });
+
+  it("mantem componentes montados vivos apos limpar o cache", () => {
+    montar();
+    limparCacheRegistros();
+
+    act(() => {
+      screen.getByTestId("add-A").click();
+    });
+
+    expect(screen.getByTestId("len-A").textContent).toBe("2");
+    expect(screen.getByTestId("len-B").textContent).toBe("2");
+  });
+});

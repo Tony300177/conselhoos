@@ -4,6 +4,8 @@ Este projeto materializa a experiência inicial do **Delibera**, uma plataforma 
 
 > **Princípio de entrega:** a interface não simula integração produtiva. Os números e registros exibidos são dados demonstrativos de layout; autenticação, persistência, documentos e permissões devem ser conectados à estrutura Supabase prevista no PRD antes do uso operacional.
 
+Os módulos administrativos já persistem seus registros no `localStorage` do navegador, por meio de um store compartilhado entre componentes. Isso dá consistência à demonstração — sem F5 e sem sobrescrita entre telas — mas **não** substitui o banco, o RLS nem qualquer controle de acesso real: os dados ficam no dispositivo de quem está usando.
+
 ## O que está entregue
 
 | Área                  | Entrega atual                                                                                                                   | Situação                                          |
@@ -50,4 +52,10 @@ O próximo incremento deve começar pelo **SQL versionado do Supabase**. Ele dev
 
 ## Qualidade verificada nesta versão
 
-A compilação TypeScript e o build de produção foram executados com sucesso. O portal público, painel, registro de conselhos, acervo, relatórios e o painel em largura móvel foram revisados visualmente. A interface responde aos links internos, filtros demonstrativos, pesquisa, seletores, navegação compacta e mensagens de ação; operações que dependem de persistência exibem orientação explícita de que requerem a conexão segura do backend.
+O gate `pnpm check` encadeia `typecheck`, `lint`, `test` e `format:check`, e passa sem erros nem avisos. O typecheck roda com `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch` e `noUncheckedIndexedAccess`; o lint usa `typescript-eslint` e as regras de hooks do React.
+
+A suíte tem 17 testes. Sete cobrem o store de registros: semeadura na primeira visita, propagação de escrita entre instâncias, ausência de sobrescrita, preservação de lista vazia, leitura da persistência existente, atualização e remoção, e sincronização quando outra aba grava. Cinco cobrem a recuperação de payload corrompido ou fora de formato, tanto na leitura inicial quanto em gravação vinda de outra aba, incluindo a volta ao valor semeado. Quatro cobrem o login local de demonstração, desligado por padrão e habilitado apenas por `VITE_DEMO_ADMIN_PASSWORD`.
+
+O build de produção separa as dependências de terceiros em chunks próprios, de modo que nenhum ultrapasse o limite de aviso de tamanho, e foi verificado servindo a saída com o servidor de pré-visualização.
+
+A recuperação de senha continua sendo um mock: exibe a confirmação sem enviar instrução alguma. O campo "Manter conectado" do login ainda não altera a persistência da sessão.

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
@@ -48,14 +48,16 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<LoginValues>({
     resolver: loginResolver,
     defaultValues: { username: "", password: "", remember: false },
   });
-  const remember = watch("remember");
+  // useWatch em vez do watch destruturado: o React Compiler nao consegue
+  // memoizar componentes que chamam a funcao watch devolvida por useForm.
+  const remember = useWatch({ control, name: "remember" });
 
   async function onSubmit(values: LoginValues) {
     setIsLoading(true);

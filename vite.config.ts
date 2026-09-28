@@ -238,6 +238,33 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        // Separa bibliotecas de terceiros do codigo da aplicacao. Alem de
+        // derrubar o aviso de chunk acima de 500 kB, aproveita o cache do
+        // navegador: as dependencias mudam bem menos que o codigo do produto.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id))
+            return "vendor-react";
+          if (id.includes("@supabase")) return "vendor-supabase";
+          if (id.includes("lucide-react")) return "vendor-icons";
+          if (
+            id.includes("react-hook-form") ||
+            id.includes("@hookform") ||
+            id.includes("/zod/")
+          )
+            return "vendor-forms";
+          if (id.includes("wouter")) return "vendor-router";
+          // Bibliotecas grandes demais para dividir por categoria util.
+          if (id.includes("recharts") || /[\\/]node_modules[\\/]d3-/.test(id))
+            return "vendor-charts";
+          if (id.includes("streamdown")) return "vendor-markdown";
+          if (id.includes("@radix-ui")) return "vendor-radix";
+          return "vendor-misc";
+        },
+      },
+    },
   },
   server: {
     port: 3000,
