@@ -1,10 +1,130 @@
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore, type SetStateAction } from "react";
 
 const PREFIXO = "delibera.registros.";
 
 function novoId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    return crypto.randomUUID();
   return `id-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+type Entrada = {
+  valor: unknown;
+  /** `true` quando ja existe persistencia para a chave; `false` na primeira visita. */
+  carregada: boolean;
+  semente: unknown;
+};
+
+const cache = new Map<string, Entrada>();
+const assinantes = new Map<string, Set<() => void>>();
+
+function notificar(chave: string) {
+  const conjunto = assinantes.get(chave);
+  if (!conjunto) return;
+  for (const cb of conjunto) cb();
+}
+
+function lerDoStorage(chave: string): unknown | null {
+  try {
+    const bruto = localStorage.getItem(PREFIXO + chave);
+    if (!bruto) return null;
+    return JSON.parse(bruto) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function gravarNoStorage(chave: string, valor: unknown) {
+  try {
+    localStorage.setItem(PREFIXO + chave, JSON.stringify(valor));
+  } catch {
+    /* cota excedida ou modo privado: segue apenas em memoria */
+  }
+}
+
+function obter(chave: string, semente: unknown): Entrada {
+  const existente = cache.get(chave);
+  if (existente) return existente;
+  const persistido = lerDoStorage(chave);
+  const entrada: Entrada =
+    persistido !== null
+      ? { valor: persistido, carregada: true, semente }
+      : { valor: semente, carregada: false, semente };
+  cache.set(chave, entrada);
+  return entrada;
+}
+
+function assinar(chave: string, cb: () => void) {
+  let conjunto = assinantes.get(chave);
+  if (!conjunto) {
+    conjunto = new Set();
+    assinantes.set(chave, conjunto);
+    instalarEscutaDeStorage();
+  }
+  conjunto.add(cb);
+  return () => {
+    conjunto.delete(cb);
+    if (conjunto.size === 0) assinantes.delete(chave);
+  };
+}
+
+let escutaInstalada = false;
+
+/**
+ * Mantem o cache em memoria alinhado com o `localStorage` quando outra aba grava.
+ * Sem isso, uma segunda aba continuaria vendo a lista antiga ate recarregar.
+ */
+function instalarEscutaDeStorage() {
+  if (escutaInstalada || typeof window === "undefined") return;
+  escutaInstalada = true;
+  window.addEventListener("storage", evento => {
+    if (!evento.key || !evento.key.startsWith(PREFIXO)) return;
+    const chave = evento.key.slice(PREFIXO.length);
+    const atual = cache.get(chave);
+    const semente = atual?.semente;
+
+    if (evento.newValue === null) {
+      // Chave apagada em outra aba: volta ao valor semeado.
+      if (semente === undefined) return;
+      cache.set(chave, { valor: semente, carregada: false, semente });
+      notificar(chave);
+      return;
+    }
+
+    let valor: unknown;
+    try {
+      valor = JSON.parse(evento.newValue) as unknown;
+    } catch {
+      return;
+    }
+    cache.set(chave, { valor, carregada: true, semente: semente ?? valor });
+    notificar(chave);
+  });
+}
+
+/**
+ * Descarta o cache em memoria. Usado por testes para simular um carregamento
+ * limpo da aplicacao; na aplicacao o cache vive enquanto a aba estiver aberta.
+ */
+export function limparCacheRegistros() {
+  cache.clear();
+  assinantes.clear();
+}
+
+/**
+ * Ponto unico de escrita. Serializa a gravacao e notifica todos os assinantes da
+ * chave, de modo que instancias concorrentes nunca sobrescrevam o estado uma da
+ * outra.
+ */
+function escrever(chave: string, valor: unknown) {
+  const atual = cache.get(chave);
+  cache.set(chave, {
+    valor,
+    carregada: true,
+    semente: atual?.semente ?? valor,
+  });
+  gravarNoStorage(chave, valor);
+  notificar(chave);
 }
 
 export type Reuniao = {
@@ -133,24 +253,31 @@ export type ConfigInstituicao = {
   regraPublicacao: string;
 };
 
-export function useConfigInstituicao(semente: ConfigInstituicao) {
-  const [config, setConfig] = useState<ConfigInstituicao>(() => {
-    try {
-      const bruto = localStorage.getItem(PREFIXO + "config");
-      if (bruto) return JSON.parse(bruto) as ConfigInstituicao;
-    } catch {
-      /* ignore */
-    }
-    return semente;
-  });
+const CHAVE_CONFIG = "config";
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(PREFIXO + "config", JSON.stringify(config));
-    } catch {
-      /* ignore */
-    }
-  }, [config]);
+export function useConfigInstituicao(semente: ConfigInstituicao) {
+  const assinarCB = useCallback(
+    (cb: () => void) => assinar(CHAVE_CONFIG, cb),
+    []
+  );
+  const getSnapshot = useCallback(
+    () => obter(CHAVE_CONFIG, semente).valor as ConfigInstituicao,
+    [semente]
+  );
+
+  const config = useSyncExternalStore(assinarCB, getSnapshot, getSnapshot);
+
+  const setConfig = useCallback(
+    (atualizador: SetStateAction<ConfigInstituicao>) => {
+      const base = obter(CHAVE_CONFIG, semente).valor as ConfigInstituicao;
+      const proximo =
+        typeof atualizador === "function"
+          ? (atualizador as (c: ConfigInstituicao) => ConfigInstituicao)(base)
+          : atualizador;
+      escrever(CHAVE_CONFIG, proximo);
+    },
+    [semente]
+  );
 
   return { config, setConfig };
 }
@@ -158,45 +285,85 @@ export function useConfigInstituicao(semente: ConfigInstituicao) {
 export function diaMes(data: string): { day: string; month: string } {
   const d = new Date(`${data}T00:00:00`);
   if (Number.isNaN(d.getTime())) return { day: "--", month: "MÊS" };
-  const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-  return { day: String(d.getDate()).padStart(2, "0"), month: meses[d.getMonth()] };
+  const meses = [
+    "JAN",
+    "FEV",
+    "MAR",
+    "ABR",
+    "MAI",
+    "JUN",
+    "JUL",
+    "AGO",
+    "SET",
+    "OUT",
+    "NOV",
+    "DEZ",
+  ];
+  return {
+    day: String(d.getDate()).padStart(2, "0"),
+    month: meses[d.getMonth()] ?? "MÊS",
+  };
 }
 
-export function useRegistros<T extends { id: string }>(chave: string, semente: T[]) {
-  const [registros, setRegistros] = useState<T[]>(() => {
-    try {
-      const bruto = localStorage.getItem(PREFIXO + chave);
-      if (bruto) {
-        const lido = JSON.parse(bruto) as T[];
-        if (Array.isArray(lido) && lido.length) return lido;
-      }
-    } catch {
-      /* ignore */
-    }
-    return semente;
-  });
+/**
+ * Colecao persistida em `localStorage` e compartilhada entre todos os
+ * componentes que usam a mesma `chave`.
+ *
+ * O estado vive em um store modulo-level lido via `useSyncExternalStore`, o que
+ * elimina dois defeitos do uso anterior de `useState` + `useEffect` por instancia:
+ *
+ * 1. instancias da mesma chave enxergavam listas diferentes e precisavam de F5;
+ * 2. cada instancia regravava a propria copia, podendo sobrescrever a outra.
+ *
+ * A semente so e aplicada enquanto a chave nunca foi gravada. Uma lista vazia
+ * gravada pelo usuario e preservada, em vez de voltar a semear.
+ */
+export function useRegistros<T extends { id: string }>(
+  chave: string,
+  semente: T[]
+) {
+  const assinarCB = useCallback(
+    (cb: () => void) => assinar(chave, cb),
+    [chave]
+  );
+  const getSnapshot = useCallback(
+    () => obter(chave, semente).valor as T[],
+    [chave, semente]
+  );
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(PREFIXO + chave, JSON.stringify(registros));
-    } catch {
-      /* ignore */
-    }
-  }, [chave, registros]);
+  const registros = useSyncExternalStore(assinarCB, getSnapshot, getSnapshot);
 
-  const adicionar = (novo: Omit<T, "id">): T => {
-    const item = { ...novo, id: novoId() } as T;
-    setRegistros((prev) => [item, ...prev]);
-    return item;
-  };
+  const adicionar = useCallback(
+    (novo: Omit<T, "id">): T => {
+      const item = { ...novo, id: novoId() } as T;
+      const atual = obter(chave, semente).valor as T[];
+      escrever(chave, [item, ...atual]);
+      return item;
+    },
+    [chave, semente]
+  );
 
-  const atualizar = (id: string, mudancas: Partial<T>) => {
-    setRegistros((prev) => prev.map((r) => (r.id === id ? { ...r, ...mudancas } : r)));
-  };
+  const atualizar = useCallback(
+    (id: string, mudancas: Partial<T>) => {
+      const atual = obter(chave, semente).valor as T[];
+      escrever(
+        chave,
+        atual.map(r => (r.id === id ? { ...r, ...mudancas } : r))
+      );
+    },
+    [chave, semente]
+  );
 
-  const remover = (id: string) => {
-    setRegistros((prev) => prev.filter((r) => r.id !== id));
-  };
+  const remover = useCallback(
+    (id: string) => {
+      const atual = obter(chave, semente).valor as T[];
+      escrever(
+        chave,
+        atual.filter(r => r.id !== id)
+      );
+    },
+    [chave, semente]
+  );
 
   return { registros, adicionar, atualizar, remover };
 }
