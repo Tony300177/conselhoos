@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogDescription,
@@ -746,38 +747,40 @@ function CivicRail({ active }: { active: ModuleKey }) {
   const [protocol, base, record, next] = context[active];
   return (
     <section className="mb-8 overflow-hidden border border-[#D5DDD4] bg-[#FCFBF7]">
-      <div className="grid sm:grid-cols-[156px_1fr]">
-        <div className="border-b border-[#244D42] bg-[#173F34] px-5 py-4 text-white sm:border-b-0 sm:border-r">
+      <div className="grid md:grid-cols-[156px_minmax(0,1fr)]">
+        <div className="min-w-0 border-b border-[#244D42] bg-[#173F34] px-4 py-4 text-white sm:px-5 md:border-b-0 md:border-r">
           <p className="text-[13px] font-bold uppercase tracking-[0.15em] text-[#BFD2C1]">
             Régua cívica
           </p>
-          <p className="mt-2 font-editorial text-[18px] font-semibold tracking-[-0.035em]">
+          <p className="mt-2 font-editorial text-[18px] font-semibold tracking-[-0.035em] break-words">
             {protocol}
           </p>
-          <p className="mt-4 text-[13px] font-bold text-[#E7DFAE]">
+          <p className="mt-4 text-[13px] font-bold break-words text-[#E7DFAE]">
             ● Em acompanhamento
           </p>
         </div>
         <div className="grid sm:grid-cols-3">
-          <div className="border-b border-[#DDE2DB] px-5 py-4 sm:border-b-0 sm:border-r">
-            <p className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#637268]">
+          <div className="min-w-0 border-b border-[#DDE2DB] px-4 py-4 sm:border-b-0 sm:border-r sm:px-5">
+            <p className="text-[13px] font-bold uppercase tracking-[0.13em] break-words text-[#637268]">
               01 · Base
             </p>
-            <p className="mt-2 text-[14px] font-bold text-[#294038]">{base}</p>
+            <p className="mt-2 text-[14px] font-bold break-words text-[#294038]">
+              {base}
+            </p>
           </div>
-          <div className="border-b border-[#DDE2DB] px-5 py-4 sm:border-b-0 sm:border-r">
-            <p className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#637268]">
+          <div className="min-w-0 border-b border-[#DDE2DB] px-4 py-4 sm:border-b-0 sm:border-r sm:px-5">
+            <p className="text-[13px] font-bold uppercase tracking-[0.13em] break-words text-[#637268]">
               02 · Registro
             </p>
-            <p className="mt-2 text-[14px] font-bold text-[#294038]">
+            <p className="mt-2 text-[14px] font-bold break-words text-[#294038]">
               {record}
             </p>
           </div>
-          <div className="bg-[#F3F6F0] px-5 py-4">
-            <p className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#A9533A]">
+          <div className="min-w-0 bg-[#F3F6F0] px-4 py-4 sm:px-5">
+            <p className="text-[13px] font-bold uppercase tracking-[0.13em] break-words text-[#A9533A]">
               03 · Próximo ato
             </p>
-            <p className="mt-2 text-[14px] font-bold leading-5 text-[#285A43]">
+            <p className="mt-2 text-[14px] font-bold leading-5 break-words text-[#285A43]">
               {next}
             </p>
           </div>
@@ -884,266 +887,274 @@ function NewCouncilDialog({
             colegiados.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-2">
-            <Label
-              htmlFor="council-name"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Nome do conselho
-            </Label>
-            <Input
-              id="council-name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Ex.: Conselho Municipal de Saúde"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="council-acronym"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Sigla
-            </Label>
-            <Input
-              id="council-acronym"
-              value={acronym}
-              onChange={e => setAcronym(e.target.value.toUpperCase())}
-              placeholder="Ex.: CMS"
-              maxLength={8}
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Área de atuação
-            </Label>
-            <Select value={area} onValueChange={setArea}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilAreas.map(a => (
-                  <SelectItem key={a} value={a}>
-                    {a}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="council-segmento"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Segmento
-            </Label>
-            <Input
-              id="council-segmento"
-              value={segmento}
-              onChange={e => setSegmento(e.target.value)}
-              placeholder="Ex.: Governo · Sociedade civil · Trabalhadores"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="council-regulamentacao"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Regulamentação
-            </Label>
-            <Textarea
-              id="council-regulamentacao"
-              value={regulamentacao}
-              onChange={e => setRegulamentacao(e.target.value)}
-              placeholder="Ex.: Lei Municipal nº 1.234/2020, que institui e regulamenta o Conselho..."
-              className="min-h-[72px] resize-y text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Cor de identificação
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {councilColors.map(c => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setColor(c.value)}
-                  title={c.label}
-                  className="grid size-9 place-items-center rounded-full border-2 transition"
-                  style={{
-                    background: c.value,
-                    borderColor: color === c.value ? "#173F34" : "transparent",
-                  }}
-                >
-                  {color === c.value ? (
-                    <Check className="size-4 text-white" />
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="grid gap-4 rounded-xl border border-[#E1E5DE] bg-[#F7F8F3] p-4">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[13px] font-bold text-[#405347]">
-                Membros iniciais
-              </p>
-              <button
-                type="button"
-                onClick={() =>
-                  setMembros(prev => [...prev, { nome: "", papel: "Titular" }])
-                }
-                className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]"
+        <DialogBody>
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <Label
+                htmlFor="council-name"
+                className="text-[13px] font-bold text-[#405347]"
               >
-                + Adicionar membro
-              </button>
+                Nome do conselho
+              </Label>
+              <Input
+                id="council-name"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Ex.: Conselho Municipal de Saúde"
+                className="text-[14px]"
+              />
             </div>
-            {membros.length === 0 ? (
-              <p className="text-[12px] text-[#8A948A]">
-                Nenhum membro incluído. Ao registrar, eles são vinculados
-                automaticamente ao conselho.
-              </p>
-            ) : (
-              membros.map((mb, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Input
-                    value={mb.nome}
-                    onChange={e => atualizarMembro(i, "nome", e.target.value)}
-                    placeholder="Nome do membro"
-                    className="min-w-0 flex-1 text-[14px]"
-                  />
-                  <Select
-                    value={mb.papel}
-                    onValueChange={v => atualizarMembro(i, "papel", v)}
-                  >
-                    <SelectTrigger className="w-[120px] shrink-0 text-[14px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["Titular", "Suplente"].map(s => (
-                        <SelectItem key={s} value={s}>
-                          {s}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            <div className="grid gap-2">
+              <Label
+                htmlFor="council-acronym"
+                className="text-[13px] font-bold text-[#405347]"
+              >
+                Sigla
+              </Label>
+              <Input
+                id="council-acronym"
+                value={acronym}
+                onChange={e => setAcronym(e.target.value.toUpperCase())}
+                placeholder="Ex.: CMS"
+                maxLength={8}
+                className="text-[14px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">
+                Área de atuação
+              </Label>
+              <Select value={area} onValueChange={setArea}>
+                <SelectTrigger className="w-full text-[14px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {councilAreas.map(a => (
+                    <SelectItem key={a} value={a}>
+                      {a}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label
+                htmlFor="council-segmento"
+                className="text-[13px] font-bold text-[#405347]"
+              >
+                Segmento
+              </Label>
+              <Input
+                id="council-segmento"
+                value={segmento}
+                onChange={e => setSegmento(e.target.value)}
+                placeholder="Ex.: Governo · Sociedade civil · Trabalhadores"
+                className="text-[14px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label
+                htmlFor="council-regulamentacao"
+                className="text-[13px] font-bold text-[#405347]"
+              >
+                Regulamentação
+              </Label>
+              <Textarea
+                id="council-regulamentacao"
+                value={regulamentacao}
+                onChange={e => setRegulamentacao(e.target.value)}
+                placeholder="Ex.: Lei Municipal nº 1.234/2020, que institui e regulamenta o Conselho..."
+                className="min-h-[72px] resize-y text-[14px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">
+                Cor de identificação
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {councilColors.map(c => (
                   <button
+                    key={c.value}
                     type="button"
-                    onClick={() =>
-                      setMembros(prev => prev.filter((_, j) => j !== i))
-                    }
-                    className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"
+                    onClick={() => setColor(c.value)}
+                    title={c.label}
+                    className="grid size-9 place-items-center rounded-full border-2 transition"
+                    style={{
+                      background: c.value,
+                      borderColor:
+                        color === c.value ? "#173F34" : "transparent",
+                    }}
                   >
-                    <X className="size-4" />
+                    {color === c.value ? (
+                      <Check className="size-4 text-white" />
+                    ) : null}
                   </button>
-                </div>
-              ))
-            )}
-            <div className="border-t border-[#E1E5DE] pt-1">
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-4 rounded-xl border border-[#E1E5DE] bg-[#F7F8F3] p-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[13px] font-bold text-[#405347]">
-                  Mandatos iniciais
+                  Membros iniciais
                 </p>
                 <button
                   type="button"
                   onClick={() =>
-                    setMandatos(prev => [
+                    setMembros(prev => [
                       ...prev,
-                      {
-                        titular: "",
-                        entidade: "",
-                        inicio: "2026-01-01",
-                        fim: "2027-12-31",
-                        situacao: "Vigente",
-                      },
+                      { nome: "", papel: "Titular" },
                     ])
                   }
                   className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]"
                 >
-                  + Adicionar mandato
+                  + Adicionar membro
                 </button>
               </div>
-              {mandatos.length === 0 ? (
+              {membros.length === 0 ? (
                 <p className="text-[12px] text-[#8A948A]">
-                  Nenhum mandato incluído. Ao registrar, eles ficam vinculados
-                  ao conselho.
+                  Nenhum membro incluído. Ao registrar, eles são vinculados
+                  automaticamente ao conselho.
                 </p>
               ) : (
-                mandatos.map((md, i) => (
-                  <div
-                    key={i}
-                    className="mb-3 grid gap-2 rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] p-3"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={md.titular}
-                        onChange={e =>
-                          atualizarMandato(i, "titular", e.target.value)
-                        }
-                        placeholder="Titular"
-                        className="min-w-0 flex-1 text-[14px]"
-                      />
-                      <Input
-                        value={md.entidade}
-                        onChange={e =>
-                          atualizarMandato(i, "entidade", e.target.value)
-                        }
-                        placeholder="Entidade"
-                        className="min-w-0 flex-1 text-[14px]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setMandatos(prev => prev.filter((_, j) => j !== i))
-                        }
-                        className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="date"
-                        value={md.inicio}
-                        onChange={e =>
-                          atualizarMandato(i, "inicio", e.target.value)
-                        }
-                        className="min-w-0 flex-1 text-[14px]"
-                      />
-                      <Input
-                        type="date"
-                        value={md.fim}
-                        onChange={e =>
-                          atualizarMandato(i, "fim", e.target.value)
-                        }
-                        className="min-w-0 flex-1 text-[14px]"
-                      />
-                      <Select
-                        value={md.situacao}
-                        onValueChange={v => atualizarMandato(i, "situacao", v)}
-                      >
-                        <SelectTrigger className="w-[136px] shrink-0 text-[14px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Vigente", "Renovado", "Encerrado"].map(s => (
-                            <SelectItem key={s} value={s}>
-                              {s}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                membros.map((mb, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      value={mb.nome}
+                      onChange={e => atualizarMembro(i, "nome", e.target.value)}
+                      placeholder="Nome do membro"
+                      className="min-w-0 flex-1 text-[14px]"
+                    />
+                    <Select
+                      value={mb.papel}
+                      onValueChange={v => atualizarMembro(i, "papel", v)}
+                    >
+                      <SelectTrigger className="w-[120px] shrink-0 text-[14px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["Titular", "Suplente"].map(s => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMembros(prev => prev.filter((_, j) => j !== i))
+                      }
+                      className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"
+                    >
+                      <X className="size-4" />
+                    </button>
                   </div>
                 ))
               )}
+              <div className="border-t border-[#E1E5DE] pt-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[13px] font-bold text-[#405347]">
+                    Mandatos iniciais
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMandatos(prev => [
+                        ...prev,
+                        {
+                          titular: "",
+                          entidade: "",
+                          inicio: "2026-01-01",
+                          fim: "2027-12-31",
+                          situacao: "Vigente",
+                        },
+                      ])
+                    }
+                    className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]"
+                  >
+                    + Adicionar mandato
+                  </button>
+                </div>
+                {mandatos.length === 0 ? (
+                  <p className="text-[12px] text-[#8A948A]">
+                    Nenhum mandato incluído. Ao registrar, eles ficam vinculados
+                    ao conselho.
+                  </p>
+                ) : (
+                  mandatos.map((md, i) => (
+                    <div
+                      key={i}
+                      className="mb-3 grid gap-2 rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] p-3"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={md.titular}
+                          onChange={e =>
+                            atualizarMandato(i, "titular", e.target.value)
+                          }
+                          placeholder="Titular"
+                          className="min-w-0 flex-1 text-[14px]"
+                        />
+                        <Input
+                          value={md.entidade}
+                          onChange={e =>
+                            atualizarMandato(i, "entidade", e.target.value)
+                          }
+                          placeholder="Entidade"
+                          className="min-w-0 flex-1 text-[14px]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setMandatos(prev => prev.filter((_, j) => j !== i))
+                          }
+                          className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="date"
+                          value={md.inicio}
+                          onChange={e =>
+                            atualizarMandato(i, "inicio", e.target.value)
+                          }
+                          className="min-w-0 flex-1 text-[14px]"
+                        />
+                        <Input
+                          type="date"
+                          value={md.fim}
+                          onChange={e =>
+                            atualizarMandato(i, "fim", e.target.value)
+                          }
+                          className="min-w-0 flex-1 text-[14px]"
+                        />
+                        <Select
+                          value={md.situacao}
+                          onValueChange={v =>
+                            atualizarMandato(i, "situacao", v)
+                          }
+                        >
+                          <SelectTrigger className="w-[136px] shrink-0 text-[14px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["Vigente", "Renovado", "Encerrado"].map(s => (
+                              <SelectItem key={s} value={s}>
+                                {s}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -1258,7 +1269,7 @@ function CouncilRegisterView() {
   return (
     <>
       <div className="space-y-7">
-        <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <div>
             <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
               Livro de registros
@@ -1322,15 +1333,15 @@ function CouncilRegisterView() {
                   0{i + 1} · 2026
                 </p>
               </div>
-              <div>
-                <p className="font-editorial text-[20px] font-semibold leading-[1.06] tracking-[-0.035em] text-[#193B32]">
+              <div className="min-w-0">
+                <p className="font-editorial text-[20px] font-semibold leading-[1.06] tracking-[-0.035em] break-words text-[#193B32]">
                   {c.name}
                 </p>
                 <p className="mt-1 text-[13px] text-[#5E6C64]">
                   Colegiado ativo · regimento e competências vinculados
                 </p>
               </div>
-              <div className="border-l border-[#E1E5DE] pl-3">
+              <div className="min-w-0 border-l border-[#E1E5DE] pl-3">
                 <p className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#89938A]">
                   Membros
                 </p>
@@ -1338,7 +1349,7 @@ function CouncilRegisterView() {
                   {c.members} ativos
                 </p>
               </div>
-              <div className="border-l border-[#E1E5DE] pl-3">
+              <div className="min-w-0 border-l border-[#E1E5DE] pl-3">
                 <StatusPill tone="confirmed">Atualizado</StatusPill>
                 <p className="mt-2 text-[13px] font-medium text-[#647166]">
                   {c.updated}
@@ -1898,9 +1909,9 @@ function MeetingsView() {
                 {meeting.month} · 2026
               </div>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-editorial text-[21px] font-semibold tracking-[-0.035em] text-[#193B32]">
+                <h2 className="font-editorial text-[21px] font-semibold tracking-[-0.035em] break-words text-[#193B32]">
                   {meeting.title}
                 </h2>
                 <StatusPill
@@ -2147,89 +2158,91 @@ function CreateReuniaoDialog({
             horário definidos.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-2">
-            <Label
-              htmlFor="mt-title"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Título da reunião
-            </Label>
-            <Input
-              id="mt-title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Ex.: 25ª Reunião Ordinária"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Conselho
-            </Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilNames.map(n => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+        <DialogBody>
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label
-                htmlFor="mt-date"
+                htmlFor="mt-title"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                Data
+                Título da reunião
               </Label>
               <Input
-                id="mt-date"
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
+                id="mt-title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Ex.: 25ª Reunião Ordinária"
                 className="text-[14px]"
               />
             </div>
             <div className="grid gap-2">
-              <Label
-                htmlFor="mt-time"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Horário
+              <Label className="text-[13px] font-bold text-[#405347]">
+                Conselho
               </Label>
-              <Input
-                id="mt-time"
-                value={time}
-                onChange={e => setTime(e.target.value)}
-                placeholder="09:00 – 12:00"
-                className="text-[14px]"
-              />
+              <Select value={council} onValueChange={setCouncil}>
+                <SelectTrigger className="w-full text-[14px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {councilNames.map(n => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="mt-date"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Data
+                </Label>
+                <Input
+                  id="mt-date"
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="mt-time"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Horário
+                </Label>
+                <Input
+                  id="mt-time"
+                  value={time}
+                  onChange={e => setTime(e.target.value)}
+                  placeholder="09:00 – 12:00"
+                  className="text-[14px]"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">
+                Status
+              </Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="w-full text-[14px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map(s => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Status
-            </Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {statuses.map(s => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -2293,94 +2306,96 @@ function CriarAtaDialog({
             oficial.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-2">
-              <Label
-                htmlFor="ata-numero"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Número
-              </Label>
-              <Input
-                id="ata-numero"
-                value={numero}
-                onChange={e => setNumero(e.target.value)}
-                placeholder={`021/${ano}`}
-                maxLength={10}
-                className="text-[14px]"
-              />
+        <DialogBody>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="ata-numero"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Número
+                </Label>
+                <Input
+                  id="ata-numero"
+                  value={numero}
+                  onChange={e => setNumero(e.target.value)}
+                  placeholder={`021/${ano}`}
+                  maxLength={10}
+                  className="text-[14px]"
+                />
+              </div>
             </div>
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="ata-title"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Título
-            </Label>
-            <Input
-              id="ata-title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Ex.: Ata da 25ª Reunião Ordinária"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Conselho
-            </Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilNames.map(n => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
               <Label
-                htmlFor="ata-date"
+                htmlFor="ata-title"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                Data
+                Título
               </Label>
               <Input
-                id="ata-date"
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
+                id="ata-title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Ex.: Ata da 25ª Reunião Ordinária"
                 className="text-[14px]"
               />
             </div>
             <div className="grid gap-2">
               <Label className="text-[13px] font-bold text-[#405347]">
-                Status
+                Conselho
               </Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={council} onValueChange={setCouncil}>
                 <SelectTrigger className="w-full text-[14px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {"Rascunho,Em revisão,Aprovada,Publicada"
-                    .split(",")
-                    .map(s => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
+                  {councilNames.map(n => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="ata-date"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Data
+                </Label>
+                <Input
+                  id="ata-date"
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Status
+                </Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {"Rascunho,Em revisão,Aprovada,Publicada"
+                      .split(",")
+                      .map(s => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -2441,90 +2456,92 @@ function CriarResolucaoDialog({
             originou.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-2">
-            <Label
-              htmlFor="res-numero"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Número
-            </Label>
-            <Input
-              id="res-numero"
-              value={numero}
-              onChange={e => setNumero(e.target.value)}
-              placeholder={`19/${ano}`}
-              maxLength={10}
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="res-title"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Ementa / título
-            </Label>
-            <Input
-              id="res-title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Ex.: Aprovação do calendário anual de reuniões"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Conselho
-            </Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilNames.map(n => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <DialogBody>
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label
-                htmlFor="res-date"
+                htmlFor="res-numero"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                Data
+                Número
               </Label>
               <Input
-                id="res-date"
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
+                id="res-numero"
+                value={numero}
+                onChange={e => setNumero(e.target.value)}
+                placeholder={`19/${ano}`}
+                maxLength={10}
+                className="text-[14px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label
+                htmlFor="res-title"
+                className="text-[13px] font-bold text-[#405347]"
+              >
+                Ementa / título
+              </Label>
+              <Input
+                id="res-title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Ex.: Aprovação do calendário anual de reuniões"
                 className="text-[14px]"
               />
             </div>
             <div className="grid gap-2">
               <Label className="text-[13px] font-bold text-[#405347]">
-                Status
+                Conselho
               </Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={council} onValueChange={setCouncil}>
                 <SelectTrigger className="w-full text-[14px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {"Minuta,Aprovada,Publicada".split(",").map(s => (
-                    <SelectItem key={s} value={s}>
-                      {s}
+                  {councilNames.map(n => (
+                    <SelectItem key={n} value={n}>
+                      {n}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="res-date"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Data
+                </Label>
+                <Input
+                  id="res-date"
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Status
+                </Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {"Minuta,Aprovada,Publicada".split(",").map(s => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -2581,95 +2598,97 @@ function CriarDocumentoDialog({
             Classifique o arquivo e defina sua visibilidade inicial no acervo.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-2">
-              <Label className="text-[13px] font-bold text-[#405347]">
-                Tipo
-              </Label>
-              <Select
-                value={type}
-                onValueChange={v => setType(v as Documento["type"])}
-              >
-                <SelectTrigger className="w-full text-[14px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {["ATA", "RES", "PAUTA", "REL"].map(t => (
-                    <SelectItem key={t} value={t}>
-                      {t}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <DialogBody>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Tipo
+                </Label>
+                <Select
+                  value={type}
+                  onValueChange={v => setType(v as Documento["type"])}
+                >
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["ATA", "RES", "PAUTA", "REL"].map(t => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Status
+                </Label>
+                <Select
+                  value={status}
+                  onValueChange={v => setStatus(v as Documento["status"])}
+                >
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Publicado", "Em revisão", "Interno"].map(s => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid gap-2">
-              <Label className="text-[13px] font-bold text-[#405347]">
-                Status
-              </Label>
-              <Select
-                value={status}
-                onValueChange={v => setStatus(v as Documento["status"])}
+              <Label
+                htmlFor="doc-title"
+                className="text-[13px] font-bold text-[#405347]"
               >
-                <SelectTrigger className="w-full text-[14px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Publicado", "Em revisão", "Interno"].map(s => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                Título
+              </Label>
+              <Input
+                id="doc-title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Ex.: Pauta da 25ª Reunião Ordinária"
+                className="text-[14px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label
+                htmlFor="doc-context"
+                className="text-[13px] font-bold text-[#405347]"
+              >
+                Contexto
+              </Label>
+              <Input
+                id="doc-context"
+                value={context}
+                onChange={e => setContext(e.target.value)}
+                placeholder="Ex.: Conselho de Educação · 04 set. 2026"
+                className="text-[14px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label
+                htmlFor="doc-file"
+                className="text-[13px] font-bold text-[#405347]"
+              >
+                Arquivo
+              </Label>
+              <Input
+                id="doc-file"
+                value={file}
+                onChange={e => setFile(e.target.value)}
+                placeholder="PDF · 2,1 MB"
+                className="text-[14px]"
+              />
             </div>
           </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="doc-title"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Título
-            </Label>
-            <Input
-              id="doc-title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Ex.: Pauta da 25ª Reunião Ordinária"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="doc-context"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Contexto
-            </Label>
-            <Input
-              id="doc-context"
-              value={context}
-              onChange={e => setContext(e.target.value)}
-              placeholder="Ex.: Conselho de Educação · 04 set. 2026"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="doc-file"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Arquivo
-            </Label>
-            <Input
-              id="doc-file"
-              value={file}
-              onChange={e => setFile(e.target.value)}
-              placeholder="PDF · 2,1 MB"
-              className="text-[14px]"
-            />
-          </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -2724,7 +2743,7 @@ function AtasView() {
   };
   return (
     <div className="space-y-7">
-      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
             Memória oficial
@@ -2746,8 +2765,8 @@ function AtasView() {
             key={ata.id}
             className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3"
           >
-            <div>
-              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">
+            <div className="min-w-0">
+              <p className="font-editorial text-[17px] font-semibold break-words text-[#A9533A]">
                 ATA {ata.numero}
               </p>
               <p className="mt-1 text-[13px] text-[#5E6C64]">
@@ -2811,7 +2830,7 @@ function ResolucoesView() {
   };
   return (
     <div className="space-y-7">
-      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
             Publicação normativa
@@ -2833,8 +2852,8 @@ function ResolucoesView() {
             key={res.id}
             className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3"
           >
-            <div>
-              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">
+            <div className="min-w-0">
+              <p className="font-editorial text-[17px] font-semibold break-words text-[#A9533A]">
                 RES {res.numero}
               </p>
               <p className="mt-1 text-[13px] text-[#5E6C64]">
@@ -2904,109 +2923,111 @@ function CriarPautaDialog({
             Organize o assunto, a relatoria e a data em que será deliberado.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-2">
-              <Label
-                htmlFor="pau-numero"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Número
-              </Label>
-              <Input
-                id="pau-numero"
-                value={numero}
-                onChange={e => setNumero(e.target.value)}
-                placeholder={`03/${ano}`}
-                maxLength={10}
-                className="text-[14px]"
-              />
+        <DialogBody>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="pau-numero"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Número
+                </Label>
+                <Input
+                  id="pau-numero"
+                  value={numero}
+                  onChange={e => setNumero(e.target.value)}
+                  placeholder={`03/${ano}`}
+                  maxLength={10}
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="pau-date"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Data
+                </Label>
+                <Input
+                  id="pau-date"
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="text-[14px]"
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <Label
-                htmlFor="pau-date"
+                htmlFor="pau-title"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                Data
+                Assunto
               </Label>
               <Input
-                id="pau-date"
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                className="text-[14px]"
-              />
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="pau-title"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Assunto
-            </Label>
-            <Input
-              id="pau-title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Ex.: Revisão do plano anual de metas"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Conselho
-            </Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilNames.map(n => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-2">
-              <Label
-                htmlFor="pau-relator"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Relator(a)
-              </Label>
-              <Input
-                id="pau-relator"
-                value={relator}
-                onChange={e => setRelator(e.target.value)}
-                placeholder="Ex.: Ana Sousa"
+                id="pau-title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Ex.: Revisão do plano anual de metas"
                 className="text-[14px]"
               />
             </div>
             <div className="grid gap-2">
               <Label className="text-[13px] font-bold text-[#405347]">
-                Status
+                Conselho
               </Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={council} onValueChange={setCouncil}>
                 <SelectTrigger className="w-full text-[14px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {"Rascunho,Em revisão,Em votação,Aprovada"
-                    .split(",")
-                    .map(s => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
+                  {councilNames.map(n => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="pau-relator"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Relator(a)
+                </Label>
+                <Input
+                  id="pau-relator"
+                  value={relator}
+                  onChange={e => setRelator(e.target.value)}
+                  placeholder="Ex.: Ana Sousa"
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Status
+                </Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {"Rascunho,Em revisão,Em votação,Aprovada"
+                      .split(",")
+                      .map(s => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -3069,124 +3090,126 @@ function CriarVotacaoDialog({
             Registre o tema deliberado e o placar com quórum correspondente.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-2">
-            <Label
-              htmlFor="vot-tema"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Tema deliberado
-            </Label>
-            <Input
-              id="vot-tema"
-              value={tema}
-              onChange={e => setTema(e.target.value)}
-              placeholder="Ex.: Aprovação do plano anual"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Conselho
-            </Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilNames.map(n => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <DialogBody>
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label
-                htmlFor="vot-date"
+                htmlFor="vot-tema"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                Data
+                Tema deliberado
               </Label>
               <Input
-                id="vot-date"
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
+                id="vot-tema"
+                value={tema}
+                onChange={e => setTema(e.target.value)}
+                placeholder="Ex.: Aprovação do plano anual"
                 className="text-[14px]"
               />
             </div>
             <div className="grid gap-2">
               <Label className="text-[13px] font-bold text-[#405347]">
-                Resultado
+                Conselho
               </Label>
-              <Select value={resultado} onValueChange={setResultado}>
+              <Select value={council} onValueChange={setCouncil}>
                 <SelectTrigger className="w-full text-[14px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {"Aprovada,Rejeitada,Empatada".split(",").map(s => (
-                    <SelectItem key={s} value={s}>
-                      {s}
+                  {councilNames.map(n => (
+                    <SelectItem key={n} value={n}>
+                      {n}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="vot-date"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Data
+                </Label>
+                <Input
+                  id="vot-date"
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Resultado
+                </Label>
+                <Select value={resultado} onValueChange={setResultado}>
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {"Aprovada,Rejeitada,Empatada".split(",").map(s => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="vot-fav"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  A favor
+                </Label>
+                <Input
+                  id="vot-fav"
+                  type="number"
+                  min={0}
+                  value={aFavor}
+                  onChange={e => setAFavor(Number(e.target.value) || 0)}
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="vot-contra"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Contra
+                </Label>
+                <Input
+                  id="vot-contra"
+                  type="number"
+                  min={0}
+                  value={contra}
+                  onChange={e => setContra(Number(e.target.value) || 0)}
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="vot-abst"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Abstenções
+                </Label>
+                <Input
+                  id="vot-abst"
+                  type="number"
+                  min={0}
+                  value={abstencoes}
+                  onChange={e => setAbstencoes(Number(e.target.value) || 0)}
+                  className="text-[14px]"
+                />
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="grid gap-2">
-              <Label
-                htmlFor="vot-fav"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                A favor
-              </Label>
-              <Input
-                id="vot-fav"
-                type="number"
-                min={0}
-                value={aFavor}
-                onChange={e => setAFavor(Number(e.target.value) || 0)}
-                className="text-[14px]"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="vot-contra"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Contra
-              </Label>
-              <Input
-                id="vot-contra"
-                type="number"
-                min={0}
-                value={contra}
-                onChange={e => setContra(Number(e.target.value) || 0)}
-                className="text-[14px]"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="vot-abst"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Abstenções
-              </Label>
-              <Input
-                id="vot-abst"
-                type="number"
-                min={0}
-                value={abstencoes}
-                onChange={e => setAbstencoes(Number(e.target.value) || 0)}
-                className="text-[14px]"
-              />
-            </div>
-          </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -3251,156 +3274,158 @@ function CriarMembroDialog({
             participação.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-2">
-            <Label
-              htmlFor="mem-nome"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Nome completo
-            </Label>
-            <Input
-              id="mem-nome"
-              value={nome}
-              onChange={e => setNome(e.target.value)}
-              placeholder="Ex.: Maria Oliveira"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <DialogBody>
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label
-                htmlFor="mem-email"
+                htmlFor="mem-nome"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                E-mail
+                Nome completo
               </Label>
               <Input
-                id="mem-email"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Ex.: maria@exemplo.gov.br"
+                id="mem-nome"
+                value={nome}
+                onChange={e => setNome(e.target.value)}
+                placeholder="Ex.: Maria Oliveira"
                 className="text-[14px]"
               />
             </div>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="mem-cpf"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                CPF
-              </Label>
-              <Input
-                id="mem-cpf"
-                value={cpf}
-                onChange={e => setCpf(e.target.value)}
-                placeholder="Ex.: 123.456.789-00"
-                className="text-[14px]"
-              />
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label
-              htmlFor="mem-entidade"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Entidade / representação
-            </Label>
-            <Input
-              id="mem-entidade"
-              value={entidade}
-              onChange={e => setEntidade(e.target.value)}
-              placeholder="Ex.: Secretaria Municipal de Saúde"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-2">
-              <Label
-                htmlFor="mem-telefone"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Número de celular
-              </Label>
-              <Input
-                id="mem-telefone"
-                value={telefone}
-                onChange={e => setTelefone(e.target.value)}
-                placeholder="Ex.: (11) 99999-0000"
-                className="text-[14px]"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="mem-email"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  E-mail
+                </Label>
+                <Input
+                  id="mem-email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Ex.: maria@exemplo.gov.br"
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="mem-cpf"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  CPF
+                </Label>
+                <Input
+                  id="mem-cpf"
+                  value={cpf}
+                  onChange={e => setCpf(e.target.value)}
+                  placeholder="Ex.: 123.456.789-00"
+                  className="text-[14px]"
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <Label
-                htmlFor="mem-endereco"
+                htmlFor="mem-entidade"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                Endereço
+                Entidade / representação
               </Label>
               <Input
-                id="mem-endereco"
-                value={endereco}
-                onChange={e => setEndereco(e.target.value)}
-                placeholder="Ex.: Rua das Flores, 123"
+                id="mem-entidade"
+                value={entidade}
+                onChange={e => setEntidade(e.target.value)}
+                placeholder="Ex.: Secretaria Municipal de Saúde"
                 className="text-[14px]"
               />
             </div>
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Conselho
-            </Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilNames.map(n => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="mem-telefone"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Número de celular
+                </Label>
+                <Input
+                  id="mem-telefone"
+                  value={telefone}
+                  onChange={e => setTelefone(e.target.value)}
+                  placeholder="Ex.: (11) 99999-0000"
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="mem-endereco"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Endereço
+                </Label>
+                <Input
+                  id="mem-endereco"
+                  value={endereco}
+                  onChange={e => setEndereco(e.target.value)}
+                  placeholder="Ex.: Rua das Flores, 123"
+                  className="text-[14px]"
+                />
+              </div>
+            </div>
             <div className="grid gap-2">
               <Label className="text-[13px] font-bold text-[#405347]">
-                Papel
+                Conselho
               </Label>
-              <Select value={papel} onValueChange={setPapel}>
+              <Select value={council} onValueChange={setCouncil}>
                 <SelectTrigger className="w-full text-[14px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {["Titular", "Suplente"].map(s => (
-                    <SelectItem key={s} value={s}>
-                      {s}
+                  {councilNames.map(n => (
+                    <SelectItem key={n} value={n}>
+                      {n}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2">
-              <Label className="text-[13px] font-bold text-[#405347]">
-                Status
-              </Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="w-full text-[14px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Ativo", "Substituído", "Encerrado"].map(s => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Papel
+                </Label>
+                <Select value={papel} onValueChange={setPapel}>
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Titular", "Suplente"].map(s => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Status
+                </Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-full text-[14px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Ativo", "Substituído", "Encerrado"].map(s => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -3552,268 +3577,270 @@ function CriarMandatoDialog({
             Vincule o titular ao conselho, à entidade e ao período de exercício.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid max-h-[60vh] gap-5 overflow-y-auto pr-1 py-2">
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
-              Identificação
-            </p>
-            <div className="grid gap-2">
-              <Label className="text-[13px] font-bold text-[#405347]">
-                Conselho *
-              </Label>
-              <Select value={council} onValueChange={setCouncil}>
-                <SelectTrigger className="w-full text-[14px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {councilNames.map(n => (
-                    <SelectItem key={n} value={n}>
-                      {n}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label className="text-[13px] font-bold text-[#405347]">
-                Titular *
-              </Label>
-              {titularNomes.length > 0 ? (
-                <Select value={titular} onValueChange={setTitular}>
+        <DialogBody>
+          <div className="grid gap-5 py-2">
+            <div className="space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
+                Identificação
+              </p>
+              <div className="grid gap-2">
+                <Label className="text-[13px] font-bold text-[#405347]">
+                  Conselho *
+                </Label>
+                <Select value={council} onValueChange={setCouncil}>
                   <SelectTrigger className="w-full text-[14px]">
-                    <SelectValue placeholder="Selecione o membro..." />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {titularNomes.map(n => (
+                    {councilNames.map(n => (
                       <SelectItem key={n} value={n}>
                         {n}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              ) : (
-                <Input
-                  value={titular}
-                  onChange={e => setTitular(e.target.value)}
-                  placeholder="Nome do titular"
-                  className="text-[14px]"
-                />
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-2">
-                <Label className="text-[13px] font-bold text-[#405347]">
-                  Cargo / função
-                </Label>
-                <Select value={cargo} onValueChange={setCargo}>
-                  <SelectTrigger className="w-full text-[14px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CARGOS_MANDATO.map(c => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               <div className="grid gap-2">
                 <Label className="text-[13px] font-bold text-[#405347]">
-                  Entidade *
+                  Titular *
                 </Label>
-                {entidades.length > 0 ? (
-                  <Select value={entidade} onValueChange={setEntidade}>
+                {titularNomes.length > 0 ? (
+                  <Select value={titular} onValueChange={setTitular}>
                     <SelectTrigger className="w-full text-[14px]">
-                      <SelectValue placeholder="Selecione..." />
+                      <SelectValue placeholder="Selecione o membro..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {entidades.map(e => (
-                        <SelectItem key={e} value={e}>
-                          {e}
+                      {titularNomes.map(n => (
+                        <SelectItem key={n} value={n}>
+                          {n}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
                   <Input
-                    value={entidade}
-                    onChange={e => setEntidade(e.target.value)}
-                    placeholder="Entidade representada"
+                    value={titular}
+                    onChange={e => setTitular(e.target.value)}
+                    placeholder="Nome do titular"
                     className="text-[14px]"
                   />
                 )}
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <Label className="text-[13px] font-bold text-[#405347]">
+                    Cargo / função
+                  </Label>
+                  <Select value={cargo} onValueChange={setCargo}>
+                    <SelectTrigger className="w-full text-[14px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CARGOS_MANDATO.map(c => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label className="text-[13px] font-bold text-[#405347]">
+                    Entidade *
+                  </Label>
+                  {entidades.length > 0 ? (
+                    <Select value={entidade} onValueChange={setEntidade}>
+                      <SelectTrigger className="w-full text-[14px]">
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {entidades.map(e => (
+                          <SelectItem key={e} value={e}>
+                            {e}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      value={entidade}
+                      onChange={e => setEntidade(e.target.value)}
+                      placeholder="Entidade representada"
+                      className="text-[14px]"
+                    />
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
-              Período do mandato
-            </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
+                Período do mandato
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="man-inicio"
+                    className="text-[13px] font-bold text-[#405347]"
+                  >
+                    Início *
+                  </Label>
+                  <Input
+                    id="man-inicio"
+                    type="date"
+                    value={inicio}
+                    onChange={e => setInicio(e.target.value)}
+                    className="text-[14px]"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="man-fim"
+                    className="text-[13px] font-bold text-[#405347]"
+                  >
+                    Fim *
+                  </Label>
+                  <Input
+                    id="man-fim"
+                    type="date"
+                    value={fim}
+                    onChange={e => setFim(e.target.value)}
+                    className="text-[14px]"
+                  />
+                </div>
+              </div>
+              {inicio && fim && fim < inicio && (
+                <p className="text-[12px] font-medium text-[#B45309]">
+                  Fim anterior ao início: ajuste o período do mandato.
+                </p>
+              )}
+              {conflito && (
+                <p className="text-[12px] font-medium text-[#A9533A]">
+                  Já existe um mandato vigente para este titular neste conselho
+                  no período informado.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
+                Ato de nomeação
+              </p>
               <div className="grid gap-2">
                 <Label
-                  htmlFor="man-inicio"
+                  htmlFor="man-numero-ato"
                   className="text-[13px] font-bold text-[#405347]"
                 >
-                  Início *
+                  Número do ato
                 </Label>
                 <Input
-                  id="man-inicio"
-                  type="date"
-                  value={inicio}
-                  onChange={e => setInicio(e.target.value)}
+                  id="man-numero-ato"
+                  value={numeroAto}
+                  onChange={e => setNumeroAto(e.target.value)}
+                  placeholder="Ex.: Portaria nº 123/2026"
                   className="text-[14px]"
                 />
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <Label className="text-[13px] font-bold text-[#405347]">
+                    Tipo do ato
+                  </Label>
+                  <Select value={tipoAto} onValueChange={setTipoAto}>
+                    <SelectTrigger className="w-full text-[14px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIPOS_ATO.map(t => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="man-data-ato"
+                    className="text-[13px] font-bold text-[#405347]"
+                  >
+                    Data do ato
+                  </Label>
+                  <Input
+                    id="man-data-ato"
+                    type="date"
+                    value={dataAto}
+                    onChange={e => setDataAto(e.target.value)}
+                    className="text-[14px]"
+                  />
+                </div>
+              </div>
               <div className="grid gap-2">
                 <Label
-                  htmlFor="man-fim"
+                  htmlFor="man-documento"
                   className="text-[13px] font-bold text-[#405347]"
                 >
-                  Fim *
+                  Documento (portaria / decreto)
                 </Label>
                 <Input
-                  id="man-fim"
-                  type="date"
-                  value={fim}
-                  onChange={e => setFim(e.target.value)}
+                  id="man-documento"
+                  value={documento}
+                  onChange={e => setDocumento(e.target.value)}
+                  placeholder="Nome ou link do documento"
                   className="text-[14px]"
                 />
               </div>
             </div>
-            {inicio && fim && fim < inicio && (
-              <p className="text-[12px] font-medium text-[#B45309]">
-                Fim anterior ao início: ajuste o período do mandato.
-              </p>
-            )}
-            {conflito && (
-              <p className="text-[12px] font-medium text-[#A9533A]">
-                Já existe um mandato vigente para este titular neste conselho no
-                período informado.
-              </p>
-            )}
-          </div>
 
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
-              Ato de nomeação
-            </p>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="man-numero-ato"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Número do ato
-              </Label>
-              <Input
-                id="man-numero-ato"
-                value={numeroAto}
-                onChange={e => setNumeroAto(e.target.value)}
-                placeholder="Ex.: Portaria nº 123/2026"
-                className="text-[14px]"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
+                Situação
+              </p>
               <div className="grid gap-2">
                 <Label className="text-[13px] font-bold text-[#405347]">
-                  Tipo do ato
+                  Situação
                 </Label>
-                <Select value={tipoAto} onValueChange={setTipoAto}>
+                <Select value={situacao} onValueChange={setSituacao}>
                   <SelectTrigger className="w-full text-[14px]">
-                    <SelectValue />
+                    <SelectValue
+                      placeholder={
+                        inicio || fim
+                          ? `Automática: ${situacaoCalculada(inicio, fim)}`
+                          : "Automática pelo período"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {TIPOS_ATO.map(t => (
-                      <SelectItem key={t} value={t}>
-                        {t}
+                    {SITUACOES_MANDATO.map(s => (
+                      <SelectItem key={s} value={s}>
+                        {s}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-[12px] text-[#7A867B]">
+                  Deixe em branco para cálculo automático pela data de hoje e o
+                  período do mandato.
+                </p>
               </div>
               <div className="grid gap-2">
                 <Label
-                  htmlFor="man-data-ato"
+                  htmlFor="man-obs"
                   className="text-[13px] font-bold text-[#405347]"
                 >
-                  Data do ato
+                  Observações
                 </Label>
-                <Input
-                  id="man-data-ato"
-                  type="date"
-                  value={dataAto}
-                  onChange={e => setDataAto(e.target.value)}
+                <Textarea
+                  id="man-obs"
+                  value={observacoes}
+                  onChange={e => setObservacoes(e.target.value)}
+                  placeholder="Contexto da nomeação, prorrogações, substituições..."
                   className="text-[14px]"
                 />
               </div>
             </div>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="man-documento"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Documento (portaria / decreto)
-              </Label>
-              <Input
-                id="man-documento"
-                value={documento}
-                onChange={e => setDocumento(e.target.value)}
-                placeholder="Nome ou link do documento"
-                className="text-[14px]"
-              />
-            </div>
           </div>
-
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
-              Situação
-            </p>
-            <div className="grid gap-2">
-              <Label className="text-[13px] font-bold text-[#405347]">
-                Situação
-              </Label>
-              <Select value={situacao} onValueChange={setSituacao}>
-                <SelectTrigger className="w-full text-[14px]">
-                  <SelectValue
-                    placeholder={
-                      inicio || fim
-                        ? `Automática: ${situacaoCalculada(inicio, fim)}`
-                        : "Automática pelo período"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {SITUACOES_MANDATO.map(s => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-[12px] text-[#7A867B]">
-                Deixe em branco para cálculo automático pela data de hoje e o
-                período do mandato.
-              </p>
-            </div>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="man-obs"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Observações
-              </Label>
-              <Textarea
-                id="man-obs"
-                value={observacoes}
-                onChange={e => setObservacoes(e.target.value)}
-                placeholder="Contexto da nomeação, prorrogações, substituições..."
-                className="text-[14px]"
-              />
-            </div>
-          </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -3861,92 +3888,94 @@ function CriarEncaminhamentoDialog({
             Conecte a decisão ao responsável e ao prazo de conclusão.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-2">
-            <Label
-              htmlFor="enc-decisao"
-              className="text-[13px] font-bold text-[#405347]"
-            >
-              Decisão / encaminhamento
-            </Label>
-            <Input
-              id="enc-decisao"
-              value={decisao}
-              onChange={e => setDecisao(e.target.value)}
-              placeholder="Ex.: Encaminhar plano à secretaria"
-              className="text-[14px]"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Conselho
-            </Label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {councilNames.map(n => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <DialogBody>
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label
-                htmlFor="enc-resp"
+                htmlFor="enc-decisao"
                 className="text-[13px] font-bold text-[#405347]"
               >
-                Responsável
+                Decisão / encaminhamento
               </Label>
               <Input
-                id="enc-resp"
-                value={responsavel}
-                onChange={e => setResponsavel(e.target.value)}
-                placeholder="Ex.: Ana Sousa"
+                id="enc-decisao"
+                value={decisao}
+                onChange={e => setDecisao(e.target.value)}
+                placeholder="Ex.: Encaminhar plano à secretaria"
                 className="text-[14px]"
               />
             </div>
             <div className="grid gap-2">
-              <Label
-                htmlFor="enc-prazo"
-                className="text-[13px] font-bold text-[#405347]"
-              >
-                Prazo
+              <Label className="text-[13px] font-bold text-[#405347]">
+                Conselho
               </Label>
-              <Input
-                id="enc-prazo"
-                type="date"
-                value={prazo}
-                onChange={e => setPrazo(e.target.value)}
-                className="text-[14px]"
-              />
+              <Select value={council} onValueChange={setCouncil}>
+                <SelectTrigger className="w-full text-[14px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {councilNames.map(n => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="enc-resp"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Responsável
+                </Label>
+                <Input
+                  id="enc-resp"
+                  value={responsavel}
+                  onChange={e => setResponsavel(e.target.value)}
+                  placeholder="Ex.: Ana Sousa"
+                  className="text-[14px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="enc-prazo"
+                  className="text-[13px] font-bold text-[#405347]"
+                >
+                  Prazo
+                </Label>
+                <Input
+                  id="enc-prazo"
+                  type="date"
+                  value={prazo}
+                  onChange={e => setPrazo(e.target.value)}
+                  className="text-[14px]"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-[13px] font-bold text-[#405347]">
+                Status
+              </Label>
+              <Select
+                value={status}
+                onValueChange={v => setStatus(v as Encaminhamento["status"])}
+              >
+                <SelectTrigger className="w-full text-[14px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Pendente", "Em andamento", "Concluído"].map(s => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="grid gap-2">
-            <Label className="text-[13px] font-bold text-[#405347]">
-              Status
-            </Label>
-            <Select
-              value={status}
-              onValueChange={v => setStatus(v as Encaminhamento["status"])}
-            >
-              <SelectTrigger className="w-full text-[14px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {["Pendente", "Em andamento", "Concluído"].map(s => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        </DialogBody>
         <DialogFooter className="gap-2 sm:justify-end">
           <DialogClose asChild>
             <Button variant="outline" className="text-[14px]">
@@ -4001,7 +4030,7 @@ function PautasView() {
   };
   return (
     <div className="space-y-7">
-      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
             Organização de pauta
@@ -4023,8 +4052,8 @@ function PautasView() {
             key={p.id}
             className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3"
           >
-            <div>
-              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">
+            <div className="min-w-0">
+              <p className="font-editorial text-[17px] font-semibold break-words text-[#A9533A]">
                 PAUTA {p.numero}
               </p>
               <p className="mt-1 text-[13px] text-[#5E6C64]">
@@ -4083,7 +4112,7 @@ function VotacoesView() {
   };
   return (
     <div className="space-y-7">
-      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
             Registro de deliberação
@@ -4105,11 +4134,13 @@ function VotacoesView() {
             key={v.id}
             className="grid gap-3 px-2 py-4 sm:grid-cols-[94px_minmax(0,1fr)_auto] sm:items-center sm:px-3"
           >
-            <div>
-              <p className="font-editorial text-[17px] font-semibold text-[#A9533A]">
+            <div className="min-w-0">
+              <p className="font-editorial text-[17px] font-semibold break-words text-[#A9533A]">
                 {formatarData(v.date)}
               </p>
-              <p className="mt-1 text-[13px] text-[#5E6C64]">{v.council}</p>
+              <p className="mt-1 text-[13px] break-words text-[#5E6C64]">
+                {v.council}
+              </p>
             </div>
             <div className="min-w-0">
               <p className="truncate text-[14px] font-bold text-[#294038]">
@@ -4164,7 +4195,7 @@ function MembrosView() {
   };
   return (
     <div className="space-y-7">
-      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
             Composição colegiada
@@ -4175,7 +4206,7 @@ function MembrosView() {
         </div>
         {conselhos.length > 0 && (
           <Select value={conselhoFiltro} onValueChange={setConselhoFiltro}>
-            <SelectTrigger className="w-[240px] text-[14px]">
+            <SelectTrigger className="w-full text-[14px] sm:w-[240px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -4282,7 +4313,7 @@ function MandatosView() {
   };
   return (
     <div className="space-y-7">
-      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
             Vigência e posse
@@ -4293,7 +4324,7 @@ function MandatosView() {
         </div>
         {conselhos.length > 0 && (
           <Select value={conselhoFiltro} onValueChange={setConselhoFiltro}>
-            <SelectTrigger className="w-[240px] text-[14px]">
+            <SelectTrigger className="w-full text-[14px] sm:w-[240px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -4326,13 +4357,13 @@ function MandatosView() {
               <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">
                 Cargo
               </TableHead>
-              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">
+              <TableHead className="hidden px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64] xl:table-cell">
                 Entidade
               </TableHead>
               <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">
                 Período
               </TableHead>
-              <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">
+              <TableHead className="hidden px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64] xl:table-cell">
                 Ato
               </TableHead>
               <TableHead className="px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[#5E6C64]">
@@ -4346,10 +4377,10 @@ function MandatosView() {
           <TableBody>
             {filtrados.map(m => (
               <TableRow key={m.id}>
-                <TableCell className="px-4 font-semibold text-[#294038]">
+                <TableCell className="px-4 font-semibold whitespace-normal text-[#294038]">
                   {m.council}
                 </TableCell>
-                <TableCell className="px-4">
+                <TableCell className="px-4 whitespace-normal">
                   <p className="font-bold text-[#294038]">{m.titular}</p>
                   {m.observacoes && (
                     <p className="max-w-[220px] truncate text-[12px] text-[#7A867B]">
@@ -4357,8 +4388,10 @@ function MandatosView() {
                     </p>
                   )}
                 </TableCell>
-                <TableCell className="px-4 text-[#5E6C64]">{m.cargo}</TableCell>
-                <TableCell className="px-4 text-[#5E6C64]">
+                <TableCell className="px-4 whitespace-normal text-[#5E6C64]">
+                  {m.cargo}
+                </TableCell>
+                <TableCell className="hidden px-4 text-[#5E6C64] xl:table-cell">
                   {m.entidade}
                 </TableCell>
                 <TableCell className="px-4 whitespace-nowrap text-[#5E6C64]">
@@ -4366,7 +4399,7 @@ function MandatosView() {
                   <span className="text-[#A8B1A8]">→</span>{" "}
                   {formatarData(m.fim)}
                 </TableCell>
-                <TableCell className="px-4 text-[#5E6C64]">
+                <TableCell className="hidden px-4 text-[#5E6C64] xl:table-cell">
                   {m.numeroAto || m.tipoAto
                     ? `${m.numeroAto || m.tipoAto}${m.dataAto ? ` · ${formatarData(m.dataAto)}` : ""}`
                     : "—"}
@@ -4427,7 +4460,7 @@ function EncaminhamentosView() {
   };
   return (
     <div className="space-y-7">
-      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 border-b border-[#DDE2DB] pb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#A9533A]">
             Responsabilidade e prazo
