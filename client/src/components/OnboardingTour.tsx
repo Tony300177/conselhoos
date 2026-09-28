@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { ArrowRight, Check, Landmark, LayoutDashboard, CalendarDays, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Landmark,
+  LayoutDashboard,
+  CalendarDays,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -57,6 +64,7 @@ export function OnboardingTour() {
   const [, setLocation] = useLocation();
 
   const step = steps[index];
+  if (!step) return null;
   const Icon = step.icon;
 
   const close = () => {
@@ -85,7 +93,12 @@ export function OnboardingTour() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) skip(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={v => {
+        if (!v) skip();
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="mb-2 flex items-center gap-2">
@@ -105,25 +118,41 @@ export function OnboardingTour() {
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-3">
-          <Progress value={((index + 1) / steps.length) * 100} className="h-1.5 flex-1 bg-[#E0E6DF]" />
+          <Progress
+            value={((index + 1) / steps.length) * 100}
+            className="h-1.5 flex-1 bg-[#E0E6DF]"
+          />
           <span className="text-[11px] font-bold text-[#718072]">
             {index + 1} / {steps.length}
           </span>
         </div>
         <DialogFooter className="flex items-center justify-between gap-2 sm:justify-between">
-          <button onClick={skip} className="text-[12px] font-bold text-[#718072] hover:text-[#285A43]">
+          <button
+            onClick={skip}
+            className="text-[12px] font-bold text-[#718072] hover:text-[#285A43]"
+          >
             Pular
           </button>
           <div className="flex items-center gap-2">
-            <Button onClick={goTo} variant="outline" className="h-10 rounded-xl border-[#CBD4CA] bg-white text-[12px] font-bold text-[#285A43] hover:bg-[#EAF1E9]">
+            <Button
+              onClick={goTo}
+              variant="outline"
+              className="h-10 rounded-xl border-[#CBD4CA] bg-white text-[12px] font-bold text-[#285A43] hover:bg-[#EAF1E9]"
+            >
               Abrir módulo
             </Button>
             {index < steps.length - 1 ? (
-              <Button onClick={next} className="h-10 rounded-xl bg-[#173F34] px-4 text-[12px] font-semibold text-white hover:bg-[#245446]">
+              <Button
+                onClick={next}
+                className="h-10 rounded-xl bg-[#173F34] px-4 text-[12px] font-semibold text-white hover:bg-[#245446]"
+              >
                 Próximo <ArrowRight className="ml-1.5 size-3.5" />
               </Button>
             ) : (
-              <Button onClick={close} className="h-10 rounded-xl bg-[#173F34] px-4 text-[12px] font-semibold text-white hover:bg-[#245446]">
+              <Button
+                onClick={close}
+                className="h-10 rounded-xl bg-[#173F34] px-4 text-[12px] font-semibold text-white hover:bg-[#245446]"
+              >
                 <Check className="mr-1.5 size-3.5" /> Concluir
               </Button>
             )}

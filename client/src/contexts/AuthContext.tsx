@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+} from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase, type UserProfile } from "@/lib/supabase";
 
@@ -16,7 +23,11 @@ type AuthContextType = {
   setSessionExpired: (value: boolean) => void;
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string
+  ) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -79,11 +90,15 @@ function clearLocalSession() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [localSession] = useState(loadLocalSession);
+  const [user, setUser] = useState<User | null>(localSession?.user ?? null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(
+    localSession?.profile ?? null
+  );
+  const [loading, setLoading] = useState(!localSession);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const wasAuthenticatedRef = useRef(Boolean(localSession?.user));
 
   async function fetchProfile(userId: string) {
     const { data, error } = await supabase
@@ -95,13 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    const localSession = loadLocalSession();
-    if (localSession) {
-      setUser(localSession.user);
-      setProfile(localSession.profile);
-      setLoading(false);
-      return;
-    }
+    if (localSession) return;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -110,24 +119,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        if (_event === "SIGNED_OUT" && !newSession?.user && !loading) {
-          setSessionExpired(true);
-        }
-        if (newSession?.user) {
-          setSessionExpired(false);
-          await fetchProfile(newSession.user.id);
-        } else {
-          setProfile(null);
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      const signedIn = Boolean(newSession?.user);
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      if (_event === "SIGNED_OUT" && !signedIn && wasAuthenticatedRef.current) {
+        setSessionExpired(true);
       }
-    );
+      wasAuthenticatedRef.current = signedIn;
+      if (newSession?.user) {
+        setSessionExpired(false);
+        await fetchProfile(newSession.user.id);
+      } else {
+        setProfile(null);
+      }
+    });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [localSession]);
 
   const signIn = async (email: string, password: string) => {
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
@@ -138,7 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSessionExpired(false);
       return { error: null };
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (!error) {
       clearLocalSession();
     }
@@ -171,10 +185,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchProfile(user.id);
   };
 
-  const isAdmin = profile?.role === "administrador" || user?.id === "admin-local";
+  const isAdmin =
+    profile?.role === "administrador" || user?.id === "admin-local";
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, sessionExpired, setSessionExpired, isAdmin, signIn, signUp, signOut, refreshProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        profile,
+        loading,
+        sessionExpired,
+        setSessionExpired,
+        isAdmin,
+        signIn,
+        signUp,
+        signOut,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
