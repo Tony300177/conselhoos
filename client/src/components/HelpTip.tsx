@@ -1,5 +1,9 @@
 import { HelpCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function HelpTip({ text }: { text: string }) {
   return (
@@ -13,7 +17,11 @@ export function HelpTip({ text }: { text: string }) {
           <HelpCircle className="size-4" />
         </button>
       </TooltipTrigger>
-      <TooltipContent side="right" align="start" className="max-w-[240px] rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] p-3 text-[12px] leading-5 text-[#405347] shadow-[0_10px_30px_rgba(23,63,52,0.12)]">
+      <TooltipContent
+        side="right"
+        align="start"
+        className="max-w-[240px] rounded-lg border border-[#D5DDD4] bg-[#FCFBF7] p-3 text-[12px] leading-5 text-[#405347] shadow-[0_10px_30px_rgba(23,63,52,0.12)]"
+      >
         {text}
       </TooltipContent>
     </Tooltip>

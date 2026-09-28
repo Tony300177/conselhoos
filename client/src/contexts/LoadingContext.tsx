@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useRef, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+  ReactNode,
+} from "react";
 import { cn } from "@/lib/utils";
 
 type LoadingContextType = {
@@ -40,6 +47,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
 
 export function useLoading() {
   const ctx = useContext(LoadingContext);
-  if (!ctx) throw new Error("useLoading deve ser usado dentro de LoadingProvider");
+  if (!ctx)
+    throw new Error("useLoading deve ser usado dentro de LoadingProvider");
   return ctx;
 }

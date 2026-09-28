@@ -18,15 +18,24 @@ const REGRAS: Record<UserProfile["role"], Acao[]> = {
   observador: [],
 };
 
-export function pode(role: UserProfile["role"] | null | undefined, acao: Acao): boolean {
+export function pode(
+  role: UserProfile["role"] | null | undefined,
+  acao: Acao
+): boolean {
   if (!role) return false;
   return REGRAS[role].includes(acao);
 }
 
-export function podePublicarPagina(role: UserProfile["role"] | null | undefined, isAdmin: boolean): boolean {
+export function podePublicarPagina(
+  role: UserProfile["role"] | null | undefined,
+  isAdmin: boolean
+): boolean {
   return isAdmin || pode(role, "publicar");
 }
 
-export function podeCriarPagina(role: UserProfile["role"] | null | undefined, isAdmin: boolean): boolean {
+export function podeCriarPagina(
+  role: UserProfile["role"] | null | undefined,
+  isAdmin: boolean
+): boolean {
   return isAdmin || pode(role, "criar");
 }

@@ -29,11 +29,15 @@ export function SessionExpiredDialog({ open }: { open: boolean }) {
         <DialogHeader className="text-center">
           <DialogTitle className="text-center">Sessão expirada</DialogTitle>
           <DialogDescription className="text-center">
-            Sua sessão chegou ao fim por inatividade ou expiração do token. Entre novamente para continuar.
+            Sua sessão chegou ao fim por inatividade ou expiração do token.
+            Entre novamente para continuar.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-center">
-          <Button onClick={handleExit} className="h-10 rounded-xl bg-[#173F34] px-5 text-[13px] font-semibold text-white hover:bg-[#245446]">
+          <Button
+            onClick={handleExit}
+            className="h-10 rounded-xl bg-[#173F34] px-5 text-[13px] font-semibold text-white hover:bg-[#245446]"
+          >
             Voltar ao login
           </Button>
         </DialogFooter>

@@ -3,8 +3,14 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const sql = readFileSync(path.join(rootDir, "supabase", "migrations", "0001_initial_schema.sql"), "utf-8");
+const rootDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+);
+const sql = readFileSync(
+  path.join(rootDir, "supabase", "migrations", "0001_initial_schema.sql"),
+  "utf-8"
+);
 
 const connectionString = process.env.SUPABASE_DB_URL;
 if (!connectionString) {

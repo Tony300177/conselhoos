@@ -18,8 +18,11 @@ export function ModuleSkeleton() {
         </div>
       </div>
       <div className="grid border-l border-t border-[#DDE2DB] sm:grid-cols-2 xl:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="space-y-3 border-b border-r border-[#DDE2DB] bg-[#FCFBF7] p-5">
+        {[0, 1, 2, 3].map(i => (
+          <div
+            key={i}
+            className="space-y-3 border-b border-r border-[#DDE2DB] bg-[#FCFBF7] p-5"
+          >
             <Skeleton className="h-3 w-20 bg-[#E3E8E0]" />
             <Skeleton className="h-8 w-16 bg-[#E3E8E0]" />
             <Skeleton className="h-3 w-24 bg-[#E3E8E0]" />

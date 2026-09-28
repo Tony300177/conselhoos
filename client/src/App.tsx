@@ -13,8 +13,12 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedAdmin } from "./components/ProtectedRoute";
 import { LoadingProvider } from "./contexts/LoadingContext";
 
-const PublicPortal = lazy(() => import("./pages/Delibera").then((m) => ({ default: m.PublicPortal })));
-const LazyAdminWorkspace = lazy(() => import("./pages/Delibera").then((m) => ({ default: m.AdminWorkspace })));
+const PublicPortal = lazy(() =>
+  import("./pages/Delibera").then(m => ({ default: m.PublicPortal }))
+);
+const LazyAdminWorkspace = lazy(() =>
+  import("./pages/Delibera").then(m => ({ default: m.AdminWorkspace }))
+);
 
 function PageLoader() {
   return (
@@ -24,8 +28,11 @@ function PageLoader() {
           <div className="h-3 w-40 animate-pulse rounded bg-[#E3E8E0]" />
           <div className="h-10 w-72 animate-pulse rounded bg-[#E3E8E0]" />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-28 animate-pulse rounded border border-[#DDE2DB] bg-[#FCFBF7]" />
+            {[0, 1, 2, 3].map(i => (
+              <div
+                key={i}
+                className="h-28 animate-pulse rounded border border-[#DDE2DB] bg-[#FCFBF7]"
+              />
             ))}
           </div>
         </div>

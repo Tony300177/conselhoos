@@ -1,4 +1,10 @@
-export type StatusTone = "confirmed" | "review" | "pending" | "neutral" | "private" | "danger";
+export type StatusTone =
+  | "confirmed"
+  | "review"
+  | "pending"
+  | "neutral"
+  | "private"
+  | "danger";
 
 export const statusStyles: Record<StatusTone, string> = {
   confirmed: "bg-[#E9F1E9] text-[#285A43] before:bg-[#3A8865]",
@@ -9,7 +15,10 @@ export const statusStyles: Record<StatusTone, string> = {
   danger: "bg-[#FAE8E2] text-[#9B4E36] before:bg-[#C0452E]",
 };
 
-export const metricIconTones: Record<"green" | "clay" | "gold" | "sage", string> = {
+export const metricIconTones: Record<
+  "green" | "clay" | "gold" | "sage",
+  string
+> = {
   green: "bg-[#E6EFE8] text-[#1F5840]",
   clay: "bg-[#F4E6DF] text-[#9B4E36]",
   gold: "bg-[#F3EBD7] text-[#8A6A1D]",

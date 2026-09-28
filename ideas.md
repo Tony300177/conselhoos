@@ -2,11 +2,11 @@
 
 ## Três abordagens consideradas
 
-| Tema | Introdução breve | Probabilidade |
-| --- | --- | ---: |
-| **Caderno Cívico** | Uma linguagem editorial institucional, cálida e precisa, que transforma a administração pública em informação legível e confiável. | 0,04 |
-| **Praça de Dados** | Uma abordagem aberta e solar para o portal de transparência, com módulos que remetem a uma praça pública digital. | 0,08 |
-| **Arquivo Contemporâneo** | Uma estética documental de alto contraste, organizada como uma coleção de decisões e registros oficiais. | 0,03 |
+| Tema                      | Introdução breve                                                                                                                   | Probabilidade |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------: |
+| **Caderno Cívico**        | Uma linguagem editorial institucional, cálida e precisa, que transforma a administração pública em informação legível e confiável. |          0,04 |
+| **Praça de Dados**        | Uma abordagem aberta e solar para o portal de transparência, com módulos que remetem a uma praça pública digital.                  |          0,08 |
+| **Arquivo Contemporâneo** | Uma estética documental de alto contraste, organizada como uma coleção de decisões e registros oficiais.                           |          0,03 |
 
 ## Abordagem escolhida: Caderno Cívico
 
