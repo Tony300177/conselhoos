@@ -9,10 +9,15 @@ import {
 import { User, Session } from "@supabase/supabase-js";
 import { supabase, type UserProfile } from "@/lib/supabase";
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "Admin123";
 const LOCAL_SESSION_KEY = "delibera.admin.session";
-const ADMIN_EMAIL = `${ADMIN_USERNAME}@delibera.local`;
+
+// Login local de demonstração, ativo apenas quando VITE_DEMO_ADMIN_PASSWORD
+// está definida. É um portão de UX para a demo, não autorização: os registros
+// vivem no localStorage e o controle real de acesso será o RLS do Supabase.
+const DEMO_ADMIN_EMAIL = "admin@delibera.local";
+const DEMO_ADMIN_PASSWORD: string | undefined = import.meta.env
+  .VITE_DEMO_ADMIN_PASSWORD;
+const demoAdminAtivo = Boolean(DEMO_ADMIN_PASSWORD);
 
 type AuthContextType = {
   user: User | null;
@@ -37,7 +42,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const LOCAL_ADMIN_PROFILE: UserProfile = {
   id: "admin-local",
   full_name: "Administrador",
-  email: ADMIN_EMAIL,
+  email: DEMO_ADMIN_EMAIL,
   avatar_url: null,
   role: "administrador",
   created_at: new Date().toISOString(),
@@ -52,7 +57,7 @@ function makeLocalAdminUser(): User {
     aud: "authenticated",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    email: ADMIN_EMAIL,
+    email: DEMO_ADMIN_EMAIL,
     email_confirmed_at: new Date().toISOString(),
     phone: "",
     role: "authenticated",
@@ -141,7 +146,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [localSession]);
 
   const signIn = async (email: string, password: string) => {
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    if (
+      demoAdminAtivo &&
+      email === DEMO_ADMIN_EMAIL &&
+      password === DEMO_ADMIN_PASSWORD
+    ) {
       const user = makeLocalAdminUser();
       saveLocalSession(user, LOCAL_ADMIN_PROFILE);
       setUser(user);

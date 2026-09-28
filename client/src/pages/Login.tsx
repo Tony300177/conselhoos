@@ -127,7 +127,7 @@ export default function Login() {
                   errors.username ? "username-error" : "username-hint"
                 }
                 className="text-base h-11"
-                placeholder="admin"
+                placeholder="seu usuário"
                 disabled={isLoading}
                 {...register("username")}
               />
