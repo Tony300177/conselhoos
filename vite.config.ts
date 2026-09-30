@@ -238,33 +238,21 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        // Separa bibliotecas de terceiros do codigo da aplicacao. Alem de
-        // derrubar o aviso de chunk acima de 500 kB, aproveita o cache do
-        // navegador: as dependencias mudam bem menos que o codigo do produto.
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id))
-            return "vendor-react";
-          if (id.includes("@supabase")) return "vendor-supabase";
-          if (id.includes("lucide-react")) return "vendor-icons";
-          if (
-            id.includes("react-hook-form") ||
-            id.includes("@hookform") ||
-            id.includes("/zod/")
-          )
-            return "vendor-forms";
-          if (id.includes("wouter")) return "vendor-router";
-          // Bibliotecas grandes demais para dividir por categoria util.
-          if (id.includes("recharts") || /[\\/]node_modules[\\/]d3-/.test(id))
-            return "vendor-charts";
-          if (id.includes("streamdown")) return "vendor-markdown";
-          if (id.includes("@radix-ui")) return "vendor-radix";
-          return "vendor-misc";
-        },
-      },
-    },
+    // O limite padrao de 500 kB existe so para chamar atencao. O chunk
+    // principal fica em ~630 kB porque react, radix, recharts e o codigo do
+    // produto sao usados juntos na tela inicial e o Rollup nao acha fronteira
+    // para cortar. Subir o limite registra a decisao em vez de esconder um chunk
+    // quebrado.
+    chunkSizeWarningLimit: 900,
+    // NAO usar rollupOptions.output.manualChunks aqui. Agrupar bibliotecas a
+    // mao parece melhorar o cache do navegador, mas o grafo de chunks que sai
+    // disso tem ciclos: react <-> radix e react -> vendor-misc -> radix. Com
+    // ciclo, a avaliacao de modulo nao tem ordem garantida: o browser comeca o
+    // bundle pela entrada, vendor-react comeca a avaliar, vendor-radix le um
+    // export ainda parcial dele e o app morre em runtime com "Cannot read
+    // properties of undefined (reading 'forwardRef')" e tela branca. O
+    // agrupamento padrao do Rollup existe justamente para quebrar os ciclos nas
+    // fronteiras certas, entao o cache do navegador fica por conta dele.
   },
   server: {
     port: 3000,
