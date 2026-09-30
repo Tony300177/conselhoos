@@ -5180,8 +5180,8 @@ export function PublicPortal() {
         )}
       </header>
       <main>
-        <section className="relative mx-auto grid max-w-[1360px] gap-6 px-5 pb-10 pt-8 sm:px-8 lg:grid-cols-[0.93fr_1.07fr] lg:pb-16 lg:pt-14">
-          <div className="relative z-10 flex flex-col justify-center lg:pb-9">
+        <section className="relative mx-auto max-w-[1360px] px-5 pb-10 pt-8 sm:px-8 lg:pb-16 lg:pt-14">
+          <div className="relative z-10 flex flex-col justify-center">
             <div className="mb-6 inline-flex w-fit items-center gap-2 border-l-2 border-[#C46C4B] pl-3 text-[13px] font-bold uppercase tracking-[0.16em] text-[#A9533A]">
               <span className="size-1.5 rounded-full bg-[#C46C4B]" />
               Transparência que se acompanha
@@ -5244,22 +5244,6 @@ export function PublicPortal() {
                   Presença média
                 </p>
               </div>
-            </div>
-          </div>
-          <div className="relative min-h-[430px] overflow-hidden bg-[#DCE5D9] sm:min-h-[500px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#173F34]/40 via-[#285A43]/25 to-[#C46C4B]/30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#173F34]/45 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
-              <div className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.16em] text-[#E7DFAE]">
-                <span className="size-1.5 rounded-full bg-[#E7DFAE]" />
-                Em destaque
-              </div>
-              <p className="mt-2 max-w-sm font-editorial text-[25px] font-semibold leading-[1.05] tracking-[-0.035em]">
-                24ª Reunião Ordinária do Conselho Municipal de Saúde
-              </p>
-              <p className="mt-3 text-[14px] font-medium text-white/80">
-                28 de agosto · 14h · Sala Plenária
-              </p>
             </div>
           </div>
         </section>
