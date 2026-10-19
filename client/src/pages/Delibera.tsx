@@ -867,14 +867,6 @@ function NewCouncilDialog({
     setMembros(prev =>
       prev.map((m, j) => (j === i ? { ...m, [campo]: valor } : m))
     );
-  const atualizarMandato = (
-    i: number,
-    campo: "titular" | "entidade" | "inicio" | "fim" | "situacao",
-    valor: string
-  ) =>
-    setMandatos(prev =>
-      prev.map((m, j) => (j === i ? { ...m, [campo]: valor } : m))
-    );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -1066,20 +1058,12 @@ function NewCouncilDialog({
                     ao conselho.
                   </p>
                 ) : (
-                  mandatos.map((md, i) => (
+                  mandatos.map((_, i) => (
                     <div
                       key={i}
                       className="mb-3 grid gap-2 rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] p-3"
                     >
                       <div className="flex items-center gap-2">
-                        <Input
-                          value={md.entidade}
-                          onChange={e =>
-                            atualizarMandato(i, "entidade", e.target.value)
-                          }
-                          placeholder="Entidade"
-                          className="min-w-0 flex-1 text-[14px]"
-                        />
                         <button
                           type="button"
                           onClick={() =>
