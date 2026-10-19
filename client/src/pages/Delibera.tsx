@@ -1007,7 +1007,7 @@ function NewCouncilDialog({
                   }
                   className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]"
                 >
-                  + Adicionar membro
+                  Adicionar
                 </button>
               </div>
               {membros.length === 0 ? (
