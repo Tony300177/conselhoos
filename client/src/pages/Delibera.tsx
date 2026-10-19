@@ -1024,21 +1024,6 @@ function NewCouncilDialog({
                       placeholder=""
                       className="min-w-0 flex-1 text-[14px]"
                     />
-                    <Select
-                      value={mb.papel}
-                      onValueChange={v => atualizarMembro(i, "papel", v)}
-                    >
-                      <SelectTrigger className="w-[120px] shrink-0 text-[14px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {["Titular", "Suplente"].map(s => (
-                          <SelectItem key={s} value={s}>
-                            {s}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                     <button
                       type="button"
                       onClick={() =>
