@@ -995,7 +995,7 @@ function NewCouncilDialog({
             <div className="grid gap-4 rounded-xl border border-[#E1E5DE] bg-[#F7F8F3] p-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[13px] font-bold text-[#405347]">
-                  Membros iniciais
+                  Composição
                 </p>
                 <button
                   type="button"
