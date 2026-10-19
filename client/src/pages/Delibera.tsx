@@ -1090,41 +1090,6 @@ function NewCouncilDialog({
                           <X className="size-4" />
                         </button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="date"
-                          value={md.inicio}
-                          onChange={e =>
-                            atualizarMandato(i, "inicio", e.target.value)
-                          }
-                          className="min-w-0 flex-1 text-[14px]"
-                        />
-                        <Input
-                          type="date"
-                          value={md.fim}
-                          onChange={e =>
-                            atualizarMandato(i, "fim", e.target.value)
-                          }
-                          className="min-w-0 flex-1 text-[14px]"
-                        />
-                        <Select
-                          value={md.situacao}
-                          onValueChange={v =>
-                            atualizarMandato(i, "situacao", v)
-                          }
-                        >
-                          <SelectTrigger className="w-[136px] shrink-0 text-[14px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["Vigente", "Renovado", "Encerrado"].map(s => (
-                              <SelectItem key={s} value={s}>
-                                {s}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
                     </div>
                   ))
                 )}
