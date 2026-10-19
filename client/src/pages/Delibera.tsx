@@ -1072,7 +1072,7 @@ function NewCouncilDialog({
                     }
                     className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]"
                   >
-                    Adicionar mandato
+                    Adicionar
                   </button>
                 </div>
                 {mandatos.length === 0 ? (
@@ -1087,14 +1087,6 @@ function NewCouncilDialog({
                       className="mb-3 grid gap-2 rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] p-3"
                     >
                       <div className="flex items-center gap-2">
-                        <Input
-                          value={md.titular}
-                          onChange={e =>
-                            atualizarMandato(i, "titular", e.target.value)
-                          }
-                          placeholder="Titular"
-                          className="min-w-0 flex-1 text-[14px]"
-                        />
                         <Input
                           value={md.entidade}
                           onChange={e =>
@@ -1163,7 +1155,6 @@ function NewCouncilDialog({
           </DialogClose>
           <Button
             className="bg-[#173F34] text-white hover:bg-[#245846] text-[14px]"
-            disabled={!name.trim() || !acronym.trim()}
             onClick={() => {
               onSave({
                 acronym: acronym.trim() || "NOV",
@@ -1249,7 +1240,7 @@ function CouncilRegisterView() {
     mandatos.forEach(md =>
       adicionarMandato({
         council: conselho.name,
-        titular: md.titular.trim(),
+        titular: md.titular.trim() || "A definir",
         cargo: "Conselheiro(a)",
         entidade: md.entidade.trim() || "Entidade a informar",
         inicio: md.inicio,
