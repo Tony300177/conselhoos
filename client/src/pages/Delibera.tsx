@@ -1028,56 +1028,51 @@ function NewCouncilDialog({
                   </div>
                 ))
               )}
-              <div className="border-t border-[#E1E5DE] pt-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[13px] font-bold text-[#405347]">
-                    Mandatos iniciais
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setMandatos(prev => [
-                        ...prev,
-                        {
-                          titular: "",
-                          entidade: "",
-                          inicio: "2026-01-01",
-                          fim: "2027-12-31",
-                          situacao: "Vigente",
-                        },
-                      ])
-                    }
-                    className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]"
-                  >
-                    Adicionar
-                  </button>
-                </div>
-                {mandatos.length === 0 ? (
-                  <p className="text-[12px] text-[#8A948A]">
-                    Nenhum mandato incluído. Ao registrar, eles ficam vinculados
-                    ao conselho.
-                  </p>
-                ) : (
-                  mandatos.map((_, i) => (
-                    <div
-                      key={i}
-                      className="mb-3 grid gap-2 rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] p-3"
-                    >
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setMandatos(prev => prev.filter((_, j) => j !== i))
-                          }
-                          className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"
-                        >
-                          <X className="size-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
+            </div>
+            <div className="grid gap-4 rounded-xl border border-[#E1E5DE] bg-[#F7F8F3] p-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[13px] font-bold text-[#405347]">
+                  Mandatos iniciais
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMandatos(prev => [
+                      ...prev,
+                      {
+                        titular: "",
+                        entidade: "",
+                        inicio: "2026-01-01",
+                        fim: "2027-12-31",
+                        situacao: "Vigente",
+                      },
+                    ])
+                  }
+                  className="text-[13px] font-bold text-[#285A43] transition hover:text-[#A9533A]"
+                >
+                  Adicionar
+                </button>
               </div>
+              {mandatos.length === 0 ? (
+                <p className="text-[12px] text-[#8A948A]">
+                  Nenhum mandato incluído. Ao registrar, eles ficam vinculados
+                  ao conselho.
+                </p>
+              ) : (
+                mandatos.map((_, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMandatos(prev => prev.filter((_, j) => j !== i))
+                      }
+                      className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#E1E5DE] bg-[#FCFBF7] text-[#8A948A] transition hover:text-[#A9533A]"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </DialogBody>
