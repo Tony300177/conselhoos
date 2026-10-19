@@ -1021,7 +1021,7 @@ function NewCouncilDialog({
                     <Input
                       value={mb.nome}
                       onChange={e => atualizarMembro(i, "nome", e.target.value)}
-                      placeholder="Nome do membro"
+                      placeholder=""
                       className="min-w-0 flex-1 text-[14px]"
                     />
                     <Select
