@@ -1059,8 +1059,20 @@ function NewCouncilDialog({
                   ao conselho.
                 </p>
               ) : (
-                mandatos.map((_, i) => (
+                mandatos.map((md, i) => (
                   <div key={i} className="flex items-center gap-2">
+                    <Input
+                      value={md.titular}
+                      onChange={e =>
+                        setMandatos(prev =>
+                          prev.map((m, j) =>
+                            j === i ? { ...m, titular: e.target.value } : m
+                          )
+                        )
+                      }
+                      placeholder=""
+                      className="min-w-0 flex-1 text-[14px]"
+                    />
                     <button
                       type="button"
                       onClick={() =>
